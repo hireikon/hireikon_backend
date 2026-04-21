@@ -1,0 +1,34 @@
+spring:
+  application:
+    version: 1.0.0-dev
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  security:
+    user:
+      name: user
+      password: test
+
+logging:
+  level:
+    root: info
+    com.hireikon: debug
+    org.hibernate.SQL: debug
+    org.springframework.security: debug
+    org.springframework.web: debug
+
+app:
+  jwt:
+    secret: ${ENCODED_JWT_SECRET_KEY_BASE64}
+    access-token-expiration-ms: 86400000    # 1 day
+    refresh-token-expiration-ms: 604800000  # 7 days
+  gemini:
+    api-key: ${GEMINI_API_KEY}
+    model: gemini-1.5-flash
+  supabase:
+    url: ${SUPABASE_URL}
+    anon-key: ${SUPABASE_ANON_KEY:your-anon-key-here}
+    storage-bucket: resumes
+  cors:
+    allowed-origins: "http://localhost:3000,http://localhost:3001"
