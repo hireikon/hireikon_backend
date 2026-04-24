@@ -28,7 +28,7 @@ app:
     model: gemini-1.5-flash
   supabase:
     url: ${SUPABASE_URL}
-    anon-key: ${SUPABASE_ANON_KEY:your-anon-key-here}
+    anon-key: ${SUPABASE_ANON_KEY}
     storage-bucket: resumes
   cors:
     allowed-origins: "http://localhost:3000,http://localhost:3001"
