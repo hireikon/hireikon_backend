@@ -23,14 +23,20 @@ class StorageService(
     fun uploadResume(file: MultipartFile, userId: String): String {
         validateResumeFile(file)
 
-        val filePath = "resumes/$userId/resume.pdf"
+        val filePath = "$userId/resume.pdf"
 
         try {
             webClient.put()
                 .uri("/object/$bucket/$filePath")
+                .header("x-upsert", "true")
                 .contentType(MediaType.APPLICATION_PDF)
                 .bodyValue(file.bytes)
                 .retrieve()
+                .onStatus({ it.isError }) { res ->
+                    res.bodyToMono<String>().map { body ->
+                        FileStorageException("Supabase error ${res.statusCode()}: $body")
+                    }
+                }
                 .bodyToMono<String>()
                 .block()
         } catch (ex: Exception) {
@@ -41,7 +47,7 @@ class StorageService(
     }
 
     fun deleteResume(userId: String) {
-        val filePath = "resumes/$userId/resume.pdf"
+        val filePath = "$userId/resume.pdf"
         try {
             webClient.delete()
                 .uri("/object/$bucket/$filePath")
