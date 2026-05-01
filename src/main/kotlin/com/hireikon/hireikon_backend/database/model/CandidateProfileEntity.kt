@@ -39,6 +39,9 @@ class CandidateProfileEntity(
     @Column(name = "linkedin_url")
     var linkedinUrl: String? = null,
 
+    @Column(name = "github_url")
+    var githubUrl: String? = null,
+
     @Column(columnDefinition = "TEXT")
     var summary: String? = null,
 

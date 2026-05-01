@@ -50,6 +50,7 @@ class CandidateService(
         profile.phone = request.phone
         profile.location = request.location
         profile.linkedinUrl = request.linkedinUrl
+        profile.githubUrl = request.githubUrl
         profile.summary = request.summary
 
         return candidateProfileRepository.save(profile).toResponse()
@@ -78,6 +79,13 @@ class CandidateService(
     }
 
     @Transactional
+    fun saveResumeUrl(userId: String, resumeUrl: String) {
+        val profile = findProfileByUserId(userId)
+        profile.resumeUrl = resumeUrl
+        candidateProfileRepository.save(profile)
+    }
+
+    @Transactional(noRollbackFor = [Exception::class])
     fun addSkill(userId: String, request: AddSkillRequest): CandidateSkillResponse {
         val profile = findProfileByUserId(userId)
 
@@ -133,7 +141,7 @@ class CandidateService(
             .map { it.toResponse() }
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = [Exception::class])
     fun addExperience(userId: String, request: ExperienceRequest): ExperienceResponse {
         val profile = findProfileByUserId(userId)
 
@@ -191,7 +199,7 @@ class CandidateService(
             .map { it.toResponse() }
     }
 
-    @Transactional
+    @Transactional(noRollbackFor = [Exception::class])
     fun addEducation(userId: String, request: EducationRequest): EducationResponse {
         val profile = findProfileByUserId(userId)
 
@@ -272,6 +280,7 @@ class CandidateService(
         location = location,
         resumeUrl = resumeUrl,
         linkedinUrl = linkedinUrl,
+        githubUrl = githubUrl,
         summary = summary,
         skills = candidateSkillRepository.findByCandidateId(id).map { it.toResponse() },
         experiences = experienceRepository.findByCandidateIdOrderByStartDateDesc(id).map { it.toResponse() },
