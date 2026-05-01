@@ -22,6 +22,9 @@ data class UpdateProfileRequest(
     @field:Size(max = 255, message = "LinkedIn URL must be at most 255 characters")
     val linkedinUrl: String? = null,
 
+    @field:Size(max = 255, message = "GitHub URL must be at most 255 characters")
+    val githubUrl: String? = null,
+
     val summary: String? = null
 )
 data class CandidateProfileResponse(
@@ -32,6 +35,7 @@ data class CandidateProfileResponse(
     val location: String?,
     val resumeUrl: String?,
     val linkedinUrl: String?,
+    val githubUrl: String?,
     val summary: String?,
     val skills: List<CandidateSkillResponse>,
     val experiences: List<ExperienceResponse>,
@@ -50,7 +54,7 @@ data class AddSkillRequest(
     val category: SkillCategory = SkillCategory.OTHER,
 
     @field:NotNull(message = "Proficiency level is required")
-    val proficiencyLevel: ProficiencyLevel
+    var proficiencyLevel: ProficiencyLevel
 )
 data class CandidateSkillResponse(
     val id: String,
@@ -71,7 +75,7 @@ data class ExperienceRequest(
 
     @field:NotNull(message = "Start date is required")
     @field:PastOrPresent(message = "Start date cannot be in the future")
-    val startDate: LocalDate,
+    var startDate: LocalDate,
 
     val endDate: LocalDate? = null,    // null = currently working here
 

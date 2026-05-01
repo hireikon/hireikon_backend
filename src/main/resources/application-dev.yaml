@@ -25,7 +25,7 @@ app:
     refresh-token-expiration-ms: 604800000  # 7 days
   gemini:
     api-key: ${GEMINI_API_KEY}
-    model: gemini-1.5-flash
+    model: gemini-2.5-flash
   supabase:
     url: ${SUPABASE_URL}
     anon-key: ${SUPABASE_ANON_KEY}
