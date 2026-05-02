@@ -98,15 +98,15 @@ class AiController(
         )
     }
 
-    // GET /api/v1/ai/quiz?skillName=Kotlin&proficiencyLevel=INTERMEDIATE&questionCount=5
+    // GET /api/v1/ai/quiz?skillName=Kotlin&proficiencyLevel=INTERMEDIATE&questionCount=10
     @GetMapping("/quiz")
     fun generateQuiz(
         @RequestParam skillName: String,
         @RequestParam proficiencyLevel: ProficiencyLevel,
-        @RequestParam(defaultValue = "5") questionCount: Int
+        @RequestParam(defaultValue = "10") questionCount: Int
     ): ResponseEntity<ApiResponse<GeneratedQuizDto>> {
-        if (questionCount !in 3..10) {
-            throw BadRequestException("questionCount must be between 3 and 10")
+        if (questionCount !in 10..30) {
+            throw BadRequestException("questionCount must be between 10 and 30")
         }
         val quiz = quizGenerator.generate(skillName, proficiencyLevel, questionCount)
         return ResponseEntity.ok(ApiResponse.ok(quiz, "Quiz generated successfully"))

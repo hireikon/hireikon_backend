@@ -49,16 +49,22 @@ class SecurityConfig(
                     // /me requires a valid token
                     .requestMatchers(HttpMethod.GET, "/api/v1/auth/me").authenticated()
 
-                    // Candidate only
-                    .requestMatchers("/api/v1/candidate/**").hasRole("CANDIDATE")
-                    .requestMatchers("/api/v1/applications/**").hasRole("CANDIDATE")
-                    .requestMatchers("/api/v1/quiz/**").hasRole("CANDIDATE")
-
                     // Recruiter only
-                    .requestMatchers(HttpMethod.POST, "/api/v1/jobs/**").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/applications/job/**").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/jobs/my").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/jobs").hasRole("RECRUITER")
                     .requestMatchers(HttpMethod.PUT,  "/api/v1/jobs/**").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.PATCH,  "/api/v1/jobs/**").hasRole("RECRUITER")
                     .requestMatchers(HttpMethod.DELETE, "/api/v1/jobs/**").hasRole("RECRUITER")
                     .requestMatchers("/api/v1/recruiter/**").hasRole("RECRUITER")
+
+                    // Candidate only
+                    .requestMatchers("/api/v1/candidate/**").hasRole("CANDIDATE")
+                    .requestMatchers(HttpMethod.POST, "/api/v1/applications/**").hasRole("CANDIDATE")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/applications/my").hasRole("CANDIDATE")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/applications/*").hasRole("CANDIDATE")
+                    .requestMatchers("/api/v1/quiz/**").hasRole("CANDIDATE")
 
                     // Admin only
                     .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

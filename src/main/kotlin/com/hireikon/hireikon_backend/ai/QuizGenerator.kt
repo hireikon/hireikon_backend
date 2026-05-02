@@ -22,7 +22,7 @@ class QuizGenerator(
     fun generate(
         skillName: String,
         proficiencyLevel: ProficiencyLevel,
-        questionCount: Int = 5
+        questionCount: Int = 10
     ): GeneratedQuizDto {
         val skill = skillRepository.findByNameIgnoreCase(skillName)
             .orElseThrow { ResourceNotFoundException("Skill '$skillName' not found") }

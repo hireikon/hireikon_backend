@@ -15,7 +15,7 @@ The AI Engine uses **Google Gemini** to power three core features:
 **All requests require:**
 
 ```
-Authorization: Bearer <accessToken>
+Authorization: Bearer <candidateAccessToken>
 ```
 
 > All AI endpoints are restricted to `CANDIDATE` role only.
@@ -41,13 +41,9 @@ Authorization: Bearer <accessToken>
 Sends a PDF resume to Gemini and returns structured extracted data. **Nothing is saved to the database** — use this to preview what will be extracted before committing.
 
 ```
-
 POST /api/v1/ai/resume/parse
-
 Content-Type: multipart/form-data
-
-Authorization: Bearer <accessToken>
-
+Authorization: Bearer <candidateAccessToken>
 ```
 
 **Form Data:**
@@ -123,13 +119,9 @@ Parses the PDF **and** automatically populates the candidate's profile — skill
 
 
 ```
-
 POST /api/v1/ai/resume/parse-and-fill
-
 Content-Type: multipart/form-data
-
-Authorization: Bearer <accessToken>
-
+Authorization: Bearer <candidateAccessToken>
 ```
 
 **Form Data:**
@@ -197,8 +189,7 @@ Calculates a match score between the candidate's skills and a job's required ski
 
 ```
 GET /api/v1/ai/match-score?jobId={jobId}
-
-Authorization: Bearer <accessToken>
+Authorization: Bearer <candidateAccessToken>
 ```
 
 **Query Parameters:**
@@ -239,8 +230,7 @@ Sends candidate skills and job requirements to Gemini for a detailed analysis. R
 
 ```
 GET /api/v1/ai/skill-gap?jobId={jobId}
-
-Authorization: Bearer <accessToken>
+Authorization: Bearer <candidateAccessToken>
 ```
 
 **Query Parameters:**
@@ -359,8 +349,7 @@ Generates multiple-choice questions for a specific skill at a given difficulty l
 
 ```
 GET /api/v1/ai/quiz?skillName={skillName}\&proficiencyLevel={level}\&questionCount={n}
-
-Authorization: Bearer <accessToken>
+Authorization: Bearer <candidateAccessToken>
 ```
 
 **Query Parameters:**
@@ -369,7 +358,7 @@ Authorization: Bearer <accessToken>
 |--------------------|---------|----------|---------|---------------------------------------------|
 | `skillName`        | string  | ✅        | —       | Must match an existing skill name in the DB |
 | `proficiencyLevel` | string  | ✅        | —       | See levels below                            |
-| `questionCount`    | integer | ❌        | `5`     | Must be between 3 and 10                    |
+| `questionCount`    | integer | ❌        | `10`    | Must be between 10 and 30                   |
 
 **Proficiency levels and their difficulty:**
 
@@ -425,11 +414,11 @@ GET /api/v1/ai/quiz?skillName=Kotlin\&proficiencyLevel=INTERMEDIATE\&questionCou
 
 **Error Responses:**
 
-| Status | Scenario                     | Message                                    |
-|--------|------------------------------|--------------------------------------------|
-| `400`  | `questionCount` outside 3–10 | `"questionCount must be between 3 and 10"` |
-| `404`  | Skill not found in DB        | `"Skill 'FakeSkill' not found"`            |
-| `502`  | Gemini API error             | `"Gemini API error ..."`                   |
+| Status | Scenario                      | Message                                     |
+|--------|-------------------------------|---------------------------------------------|
+| `400`  | `questionCount` outside 10–30 | `"questionCount must be between 10 and 30"` |
+| `404`  | Skill not found in DB         | `"Skill 'FakeSkill' not found"`             |
+| `502`  | Gemini API error              | `"Gemini API error ..."`                    |
 
 > **Note:** The skill must already exist in the `skills` table. Skills are created automatically when candidates add them to their profile — so run `/candidate/skills` first to populate the DB.
 
@@ -437,11 +426,9 @@ GET /api/v1/ai/quiz?skillName=Kotlin\&proficiencyLevel=INTERMEDIATE\&questionCou
 
 ## Gemini Integration Details
 
-
-
 **Model:** Configured via `app.gemini.model` in `application.yml`
-- Dev: `gemini-1.5-flash` (fast, free tier)
-- Prod: `gemini-1.5-pro` (higher quality, paid)
+- Dev: `gemini-2.5-flash` (fast, free tier)
+- Prod: `gemini-2.5-flash or gemini-2.5-pro` (higher quality, paid)
 
 **Temperature settings:**
 - Resume parsing: `0.1` — very deterministic, exact data extraction
