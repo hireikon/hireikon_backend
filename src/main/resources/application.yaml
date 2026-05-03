@@ -39,3 +39,12 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
