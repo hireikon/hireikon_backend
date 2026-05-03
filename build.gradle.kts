@@ -19,8 +19,6 @@ repositories {
 	mavenCentral()
 }
 
-//extra["springAiVersion"] = "1.1.4"
-
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -31,7 +29,6 @@ dependencies {
 	implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-//	implementation("org.springframework.ai:spring-ai-starter-model-google-genai")
 
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	runtimeOnly("org.postgresql:postgresql")
@@ -50,12 +47,6 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation(kotlin("stdlib"))
 }
-
-//dependencyManagement {
-//	imports {
-//		mavenBom("org.springframework.ai:spring-ai-bom:${property("springAiVersion")}")
-//	}
-//}
 
 kotlin {
 	compilerOptions {
