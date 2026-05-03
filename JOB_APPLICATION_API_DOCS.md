@@ -4,7 +4,7 @@
 
 The Job & Application API handles job posting by recruiters, job browsing by candidates, applying to jobs, and managing the full recruitment pipeline including shortlisting and rejection.
 
-**Base URL:** `http://localhost:8080/api/v1`
+**Base URL:** `https://hireikon-backend.onrender.com/api/v1`
 
 ---
 

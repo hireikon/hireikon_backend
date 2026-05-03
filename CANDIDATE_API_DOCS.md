@@ -4,7 +4,7 @@
 
 The Candidate API allows candidates to manage their profile, upload resumes, and maintain their skills, work experience, and education. All endpoints require a valid `CANDIDATE` role JWT access token.
 
-**Base URL:** `http://localhost:8080/api/v1/candidate`
+**Base URL:** `https://hireikon-backend.onrender.com/api/v1/candidate`
 
 **All requests require:**
 ```
@@ -15,24 +15,24 @@ Authorization: Bearer <accessToken>
 
 ## Endpoints Summary
 
-| Endpoint | Method | Description |
-|---|---|---|
-| `/profile` | GET | Get full profile |
-| `/profile` | PUT | Update profile info |
-| `/resume` | POST | Upload PDF resume |
-| `/resume` | DELETE | Delete resume |
-| `/skills` | GET | Get all skills |
-| `/skills` | POST | Add a skill |
-| `/skills/{id}` | PATCH | Update skill proficiency |
-| `/skills/{id}` | DELETE | Remove a skill |
-| `/experiences` | GET | Get all experiences |
-| `/experiences` | POST | Add experience |
-| `/experiences/{id}` | PUT | Update experience |
-| `/experiences/{id}` | DELETE | Delete experience |
-| `/educations` | GET | Get all educations |
-| `/educations` | POST | Add education |
-| `/educations/{id}` | PUT | Update education |
-| `/educations/{id}` | DELETE | Delete education |
+| Endpoint            | Method | Description              |
+|---------------------|--------|--------------------------|
+| `/profile`          | GET    | Get full profile         |
+| `/profile`          | PUT    | Update profile info      |
+| `/resume`           | POST   | Upload PDF resume        |
+| `/resume`           | DELETE | Delete resume            |
+| `/skills`           | GET    | Get all skills           |
+| `/skills`           | POST   | Add a skill              |
+| `/skills/{id}`      | PATCH  | Update skill proficiency |
+| `/skills/{id}`      | DELETE | Remove a skill           |
+| `/experiences`      | GET    | Get all experiences      |
+| `/experiences`      | POST   | Add experience           |
+| `/experiences/{id}` | PUT    | Update experience        |
+| `/experiences/{id}` | DELETE | Delete experience        |
+| `/educations`       | GET    | Get all educations       |
+| `/educations`       | POST   | Add education            |
+| `/educations/{id}`  | PUT    | Update education         |
+| `/educations/{id}`  | DELETE | Delete education         |
 
 ---
 
@@ -110,9 +110,9 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario |
-|---|---|
-| `400` | `fullName` is blank or exceeds 100 chars |
+| Status | Scenario                                 |
+|--------|------------------------------------------|
+| `400`  | `fullName` is blank or exceeds 100 chars |
 
 ---
 
@@ -129,9 +129,9 @@ Content-Type: multipart/form-data
 
 **Form Data:**
 
-| Key | Type | Required | Constraints |
-|---|---|---|---|
-| `file` | File | ✅ | PDF only, max 10MB |
+| Key    | Type | Required | Constraints        |
+|--------|------|----------|--------------------|
+| `file` | File | ✅        | PDF only, max 10MB |
 
 **Success Response — `201 Created`:**
 ```json
@@ -147,11 +147,11 @@ Content-Type: multipart/form-data
 
 **Error Responses:**
 
-| Status | Scenario | Message |
-|---|---|---|
-| `500` | Non-PDF file uploaded | `"Only PDF files are allowed. Received: image/jpeg"` |
-| `413` | File exceeds 10MB | `"File size exceeds 10MB limit"` |
-| `500` | Supabase Storage error | `"Failed to upload resume: ..."` |
+| Status | Scenario               | Message                                              |
+|--------|------------------------|------------------------------------------------------|
+| `500`  | Non-PDF file uploaded  | `"Only PDF files are allowed. Received: image/jpeg"` |
+| `413`  | File exceeds 10MB      | `"File size exceeds 10MB limit"`                     |
+| `500`  | Supabase Storage error | `"Failed to upload resume: ..."`                     |
 
 > **Postman tip:** In the Body tab, select `form-data`. Set the key to `file` and change the type dropdown from `Text` to `File`, then select your PDF.
 
@@ -179,9 +179,9 @@ DELETE /api/v1/candidate/resume
 
 **Error Responses:**
 
-| Status | Scenario | Message |
-|---|---|---|
-| `400` | No resume exists to delete | `"No resume found to delete"` |
+| Status | Scenario                   | Message                       |
+|--------|----------------------------|-------------------------------|
+| `400`  | No resume exists to delete | `"No resume found to delete"` |
 
 ---
 
@@ -224,11 +224,11 @@ Content-Type: application/json
 
 **Request Body:**
 
-| Field | Type | Required | Constraints |
-|---|---|---|---|
-| `skillName` | string | ✅ | Max 50 chars |
-| `category` | string | ❌ | See categories below. Defaults to `OTHER` |
-| `proficiencyLevel` | string | ✅ | See levels below |
+| Field              | Type   | Required | Constraints                               |
+|--------------------|--------|----------|-------------------------------------------|
+| `skillName`        | string | ✅        | Max 50 chars                              |
+| `category`         | string | ❌        | See categories below. Defaults to `OTHER` |
+| `proficiencyLevel` | string | ✅        | See levels below                          |
 
 **Skill Categories:**
 `PROGRAMMING` `FRAMEWORK` `DATABASE` `CLOUD` `DEVOPS` `DESIGN` `SOFT_SKILL` `LANGUAGE` `OTHER`
@@ -263,10 +263,10 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario | Message |
-|---|---|---|
-| `409` | Skill already added | `"You already have 'Kotlin' in your skills"` |
-| `400` | Missing required fields | Validation errors |
+| Status | Scenario                | Message                                      |
+|--------|-------------------------|----------------------------------------------|
+| `409`  | Skill already added     | `"You already have 'Kotlin' in your skills"` |
+| `400`  | Missing required fields | Validation errors                            |
 
 ---
 
@@ -280,9 +280,9 @@ PATCH /api/v1/candidate/skills/{id}?proficiencyLevel=ADVANCED
 
 **Query Parameter:**
 
-| Param | Type | Required | Values |
-|---|---|---|---|
-| `proficiencyLevel` | string | ✅ | `BEGINNER` `INTERMEDIATE` `ADVANCED` `EXPERT` |
+| Param              | Type   | Required | Values                                        |
+|--------------------|--------|----------|-----------------------------------------------|
+| `proficiencyLevel` | string | ✅        | `BEGINNER` `INTERMEDIATE` `ADVANCED` `EXPERT` |
 
 **Success Response — `200 OK`:**
 ```json
@@ -300,10 +300,10 @@ PATCH /api/v1/candidate/skills/{id}?proficiencyLevel=ADVANCED
 
 **Error Responses:**
 
-| Status | Scenario |
-|---|---|
-| `404` | Skill not found |
-| `401` | Skill belongs to another candidate |
+| Status | Scenario                           |
+|--------|------------------------------------|
+| `404`  | Skill not found                    |
+| `401`  | Skill belongs to another candidate |
 
 ---
 
@@ -377,13 +377,13 @@ Content-Type: application/json
 
 **Request Body:**
 
-| Field | Type | Required | Constraints |
-|---|---|---|---|
-| `company` | string | ✅ | Max 100 chars |
-| `title` | string | ✅ | Max 150 chars |
-| `startDate` | date | ✅ | `YYYY-MM-DD`, cannot be future |
-| `endDate` | date | ❌ | `YYYY-MM-DD`, must be after startDate. Omit if currently working |
-| `description` | string | ❌ | No limit |
+| Field         | Type   | Required | Constraints                                                      |
+|---------------|--------|----------|------------------------------------------------------------------|
+| `company`     | string | ✅        | Max 100 chars                                                    |
+| `title`       | string | ✅        | Max 150 chars                                                    |
+| `startDate`   | date   | ✅        | `YYYY-MM-DD`, cannot be future                                   |
+| `endDate`     | date   | ❌        | `YYYY-MM-DD`, must be after startDate. Omit if currently working |
+| `description` | string | ❌        | No limit                                                         |
 
 **Example — past job:**
 ```json
@@ -425,11 +425,11 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario | Message |
-|---|---|---|
-| `400` | `endDate` before `startDate` | `"End date cannot be before start date"` |
-| `400` | `startDate` in the future | `"Start date cannot be in the future"` |
-| `400` | Missing required fields | Validation errors |
+| Status | Scenario                     | Message                                  |
+|--------|------------------------------|------------------------------------------|
+| `400`  | `endDate` before `startDate` | `"End date cannot be before start date"` |
+| `400`  | `startDate` in the future    | `"Start date cannot be in the future"`   |
+| `400`  | Missing required fields      | Validation errors                        |
 
 ---
 
@@ -444,11 +444,11 @@ Same request body as Add Experience. All fields are replaced.
 
 **Error Responses:**
 
-| Status | Scenario |
-|---|---|
-| `404` | Experience not found |
-| `401` | Experience belongs to another candidate |
-| `400` | Invalid dates |
+| Status | Scenario                                |
+|--------|-----------------------------------------|
+| `404`  | Experience not found                    |
+| `401`  | Experience belongs to another candidate |
+| `400`  | Invalid dates                           |
 
 ---
 
@@ -509,12 +509,12 @@ Content-Type: application/json
 
 **Request Body:**
 
-| Field | Type | Required | Constraints |
-|---|---|---|---|
-| `institution` | string | ✅ | Max 150 chars |
-| `degree` | string | ✅ | Max 100 chars |
-| `field` | string | ✅ | Max 100 chars |
-| `graduationDate` | date | ❌ | `YYYY-MM-DD`. Omit if still studying |
+| Field            | Type   | Required | Constraints                          |
+|------------------|--------|----------|--------------------------------------|
+| `institution`    | string | ✅        | Max 150 chars                        |
+| `degree`         | string | ✅        | Max 100 chars                        |
+| `field`          | string | ✅        | Max 100 chars                        |
+| `graduationDate` | date   | ❌        | `YYYY-MM-DD`. Omit if still studying |
 
 **Example:**
 ```json

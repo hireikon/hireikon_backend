@@ -4,7 +4,7 @@
 
 The Auth API handles user registration, login, token management, and logout for the Hireikon platform. It uses **JWT (JSON Web Tokens)** for stateless authentication with a **refresh token rotation** strategy for security.
 
-**Base URL:** `http://localhost:8080/api/v1/auth`
+**Base URL:** `https://hireikon-backend.onrender.com/api/v1/auth`
 
 **All responses follow this shape:**
 ```json

@@ -112,7 +112,8 @@ src/main/kotlin/com/hireikon/hireikon_backend/
 
 ### Run Locally
 
-Server starts at `http://localhost:8080`
+Server starts at `http://localhost:8080` - development  
+Server starts at `https://hireikon-backend.onrender.com` - live
 
 ### Supabase Setup (one-time)
 
@@ -138,6 +139,7 @@ WITH CHECK (bucket_id = 'resumes');
 
 ```
 http://localhost:8080/api/v1
+https://hireikon-backend.onrender.com/api/v1
 ```
 
 ### Response Format

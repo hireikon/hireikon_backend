@@ -10,7 +10,7 @@ The AI Engine uses **Google Gemini** to power three core features:
 
 - **Quiz Generation** — generate skill assessment questions
 
-**Base URL:** `http://localhost:8080/api/v1/ai`
+**Base URL:** `https://hireikon-backend.onrender.com/api/v1/ai`
 
 **All requests require:**
 
