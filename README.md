@@ -105,6 +105,7 @@ src/main/kotlin/com/hireikon/hireikon_backend/
 | `POSTGRES_PASSWORD`             | Supabase database password          |
 | `ENCODED_JWT_SECRET_KEY_BASE64` | HS512 signing secret (min 32 chars) |
 | `SPRING_PROFILES_ACTIVE`        | Active Profile (dev or prod)        |
+| `FRONTEND_URL`                  | Frontend url to make requests       |
 | `GEMINI_API_KEY`                | Google Gemini API key               |
 | `SUPABASE_URL`                  | e.g. `https://xyz.supabase.co`      |
 | `SUPABASE_ANON_KEY`             | Supabase project anon key           |
