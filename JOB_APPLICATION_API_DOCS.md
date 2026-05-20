@@ -37,15 +37,17 @@ Browse all open jobs. Supports optional keyword and location filtering.
 GET /api/v1/jobs
 GET /api/v1/jobs?keyword=backend
 GET /api/v1/jobs?location=dhaka
-GET /api/v1/jobs?keyword=kotlin&location=dhaka
+GET /api/v1/jobs?keyword=kotlin&location=dhaka&cursor={cursor}&pageSize={pageSize}
 ```
 
 **Query Parameters:**
 
-| Param      | Type   | Required | Description                             |
-|------------|--------|----------|-----------------------------------------|
-| `keyword`  | string | ❌        | Filters by job title (case-insensitive) |
-| `location` | string | ❌        | Filters by location (case-insensitive)  |
+| Param      | Type          | Required | Description                                             |
+|------------|---------------|----------|---------------------------------------------------------|
+| `keyword`  | string        | ❌        | Filters by job title (case-insensitive)                 |
+| `location` | string        | ❌        | Filters by location (case-insensitive)                  |
+| `cursor`   | string (UUID) | ❌        | ID of last item from previous page. Omit for first page |
+| `pageSize` | integer       | ❌        | Items per page. Min 1, max 100. Default 20              |
 
 **Success Response — `200 OK`:**
 ```json
@@ -393,9 +395,16 @@ No request body needed — `jobId` is in the path.
 Returns all applications submitted by the authenticated candidate, including job summary and current status.
 
 ```
-GET /api/v1/applications/my
+GET /api/v1/applications/my?cursor={cursor}&pageSize={pageSize}
 Authorization: Bearer <candidateAccessToken>
 ```
+
+**Query Parameters:**
+
+| Param      | Type          | Required | Description                                             |
+|------------|---------------|----------|---------------------------------------------------------|
+| `cursor`   | string (UUID) | ❌        | ID of last item from previous page. Omit for first page |
+| `pageSize` | integer       | ❌        | Items per page. Min 1, max 100. Default 20              |
 
 **Success Response — `200 OK`:**
 ```json

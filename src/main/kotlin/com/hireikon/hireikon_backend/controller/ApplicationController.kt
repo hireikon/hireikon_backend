@@ -7,6 +7,8 @@ import com.hireikon.hireikon_backend.dto.MyApplicationResponse
 import com.hireikon.hireikon_backend.dto.UpdateApplicationStatusRequest
 import com.hireikon.hireikon_backend.service.ApplicationService
 import com.hireikon.hireikon_backend.shared.ApiResponse
+import com.hireikon.hireikon_backend.shared.CursorPage
+import com.hireikon.hireikon_backend.shared.CursorRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -38,11 +40,14 @@ class ApplicationController(
             )
         )
 
-    // GET /api/v1/applications/my
+    // GET /api/v1/applications/my?cursor=uuid&pageSize=20
     @GetMapping("/my")
-    fun getMyApplications(): ResponseEntity<ApiResponse<List<MyApplicationResponse>>> =
+    fun getMyApplications(
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") pageSize: Int
+    ): ResponseEntity<ApiResponse<CursorPage<MyApplicationResponse>>> =
         ResponseEntity.ok(ApiResponse.ok(
-            applicationService.getMyApplications(currentUserId())
+            applicationService.getMyApplications(currentUserId(), CursorRequest(cursor, pageSize))
         ))
 
     // GET /api/v1/applications/{id}
@@ -54,14 +59,16 @@ class ApplicationController(
             applicationService.getApplicationById(currentUserId(), id)
         ))
 
-    // GET /api/v1/applications/job/{jobId}?status=SHORTLISTED
+    // GET /api/v1/applications/job/{jobId}?status=SHORTLISTED&cursor=uuid&pageSize=20
     @GetMapping("/job/{jobId}")
     fun getApplicants(
         @PathVariable jobId: String,
-        @RequestParam(required = false) status: ApplicationStatus?
-    ): ResponseEntity<ApiResponse<List<ApplicantResponse>>> =
+        @RequestParam(required = false) status: ApplicationStatus?,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") pageSize: Int
+    ): ResponseEntity<ApiResponse<CursorPage<ApplicantResponse>>> =
         ResponseEntity.ok(ApiResponse.ok(
-            applicationService.getApplicants(currentUserId(), jobId, status)
+            applicationService.getApplicants(currentUserId(), jobId, status, CursorRequest(cursor, pageSize))
         ))
 
     // PATCH /api/v1/applications/{id}/status

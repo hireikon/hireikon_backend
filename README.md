@@ -165,6 +165,28 @@ Authorization: Bearer <accessToken>
 
 ---
 
+### Pagination
+List endpoints support cursor-based pagination via query params:
+
+| Param      | Default | Description                                             |
+|------------|---------|---------------------------------------------------------|
+| `cursor`   | `null`  | ID of last item from previous page. Omit for first page |
+| `pageSize` | `20`    | Items per page. Min 1, max 100                          |
+
+Response includes:
+```json
+{
+  "data": [...],
+  "nextCursor": "uuid-of-last-item",
+  "hasMore": true,
+  "pageSize": 20
+}
+```
+
+Pass `nextCursor` as `cursor` in the next request. When `hasMore` is `false`, you've reached the last page.
+
+---
+
 ## Modules
 
 ### Auth `/api/v1/auth`
@@ -229,15 +251,15 @@ roadmap with resources per skill.
 
 ### Jobs `/api/v1/jobs`
 
-| Method | Endpoint       | Auth      | Description                                  |
-|--------|----------------|-----------|----------------------------------------------|
-| GET    | `/`            | ❌         | Browse open jobs (keyword + location filter) |
-| GET    | `/{id}`        | ❌         | Get job details with required skills         |
-| GET    | `/my`          | RECRUITER | Get recruiter's own jobs                     |
-| POST   | `/`            | RECRUITER | Post a new job                               |
-| PUT    | `/{id}`        | RECRUITER | Update job (replaces skill list)             |
-| PATCH  | `/{id}/status` | RECRUITER | Change job status                            |
-| DELETE | `/{id}`        | RECRUITER | Delete job (cascades to applications)        |
+| Method | Endpoint       | Auth      | Description                                             |
+|--------|----------------|-----------|---------------------------------------------------------|
+| GET    | `/`            | ❌         | Browse open jobs (keyword + location filter, paginated) |
+| GET    | `/{id}`        | ❌         | Get job details with required skills                    |
+| GET    | `/my`          | RECRUITER | Get recruiter's own jobs (paginated)                    |
+| POST   | `/`            | RECRUITER | Post a new job                                          |
+| PUT    | `/{id}`        | RECRUITER | Update job (replaces skill list)                        |
+| PATCH  | `/{id}/status` | RECRUITER | Change job status                                       |
+| DELETE | `/{id}`        | RECRUITER | Delete job (cascades to applications)                   |
 
 **Match score weighting:** mandatory skills = 70%, optional skills = 30%
 
@@ -245,14 +267,14 @@ roadmap with resources per skill.
 
 ### Applications `/api/v1/applications`
 
-| Method | Endpoint               | Auth      | Description                           |
-|--------|------------------------|-----------|---------------------------------------|
-| POST   | `/{jobId}`             | CANDIDATE | Apply to a job                        |
-| GET    | `/my`                  | CANDIDATE | View my applications                  |
-| GET    | `/{id}`                | CANDIDATE | Get application detail                |
-| GET    | `/job/{jobId}`         | RECRUITER | View applicants sorted by match score |
-| GET    | `/job/{jobId}?status=` | RECRUITER | Filter applicants by status           |
-| PATCH  | `/{id}/status`         | RECRUITER | Shortlist / reject / hire             |
+| Method | Endpoint               | Auth      | Description                                       |
+|--------|------------------------|-----------|---------------------------------------------------|
+| POST   | `/{jobId}`             | CANDIDATE | Apply to a job                                    |
+| GET    | `/my`                  | CANDIDATE | View my applications (paginated)                  |
+| GET    | `/{id}`                | CANDIDATE | Get application detail                            |
+| GET    | `/job/{jobId}`         | RECRUITER | View applicants sorted by match score (paginated) |
+| GET    | `/job/{jobId}?status=` | RECRUITER | Filter applicants by status (paginated)           |
+| PATCH  | `/{id}/status`         | RECRUITER | Shortlist / reject / hire                         |
 
 **Application statuses:** `PENDING` → `REVIEWED` → `SHORTLISTED` → `HIRED` / `REJECTED`
 
@@ -266,8 +288,8 @@ roadmap with resources per skill.
 | GET    | `/{id}`                     | Get quiz questions (correct answers hidden)      |
 | POST   | `/{id}/submit`              | Submit answers — reveals correct answers + score |
 | GET    | `/{id}/result`              | Get result of submitted quiz                     |
-| GET    | `/history`                  | All quizzes taken                                |
-| GET    | `/history/skill?skillName=` | Quizzes filtered by skill                        |
+| GET    | `/history`                  | All quizzes taken (paginated)                    |
+| GET    | `/history/skill?skillName=` | Quizzes filtered by skill (paginated)            |
 
 **Quiz flow:** Generate → Answer → Submit → Score (0–100) → Result with explanations
 

@@ -15,8 +15,11 @@ import com.hireikon.hireikon_backend.dto.JobSkillRequest
 import com.hireikon.hireikon_backend.dto.JobSkillResponse
 import com.hireikon.hireikon_backend.dto.JobSummaryResponse
 import com.hireikon.hireikon_backend.dto.UpdateJobRequest
+import com.hireikon.hireikon_backend.shared.CursorPage
+import com.hireikon.hireikon_backend.shared.CursorRequest
 import com.hireikon.hireikon_backend.shared.ResourceNotFoundException
 import com.hireikon.hireikon_backend.shared.UnauthorizedException
+import com.hireikon.hireikon_backend.shared.toCursorPage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -29,8 +32,19 @@ class JobService(
     private val jobRequiredSkillRepository: JobRequiredSkillRepository
 ) {
 
-    fun getOpenJobs(keyword: String? = null, location: String? = null): List<JobSummaryResponse> =
-        jobRepository.searchJobs(location, keyword).map { it.toSummary() }
+    fun getOpenJobs(
+        keyword: String? = null,
+        location: String? = null,
+        cursorRequest: CursorRequest = CursorRequest()
+    ): CursorPage<JobSummaryResponse> {
+        val size = cursorRequest.validatedPageSize
+        val items = jobRepository.searchJobsCursor(location, keyword, cursorRequest.cursor, size + 1)
+        return items.toCursorPage(
+            pageSize = size,
+            idExtractor = { it.id },
+            mapper = { it.toSummary() }
+        )
+    }
 
     fun getJobById(jobId: String): JobResponse {
         val job = findJob(jobId)
@@ -90,10 +104,16 @@ class JobService(
         return jobRepository.save(job).toResponse()
     }
 
-    fun getMyJobs(userId: String): List<JobSummaryResponse> {
+    fun getMyJobs(userId: String, cursorRequest: CursorRequest = CursorRequest()): CursorPage<JobSummaryResponse> {
         val recruiter = recruiterRepository.findByUserId(userId)
             .orElseThrow { ResourceNotFoundException("Recruiter profile not found") }
-        return jobRepository.findByRecruiterId(recruiter.id).map { it.toSummary() }
+        val size = cursorRequest.validatedPageSize
+        val items = jobRepository.findByRecruiterIdCursor(recruiter.id, cursorRequest.cursor, size + 1)
+        return items.toCursorPage(
+            pageSize = size,
+            idExtractor = { it.id },
+            mapper = { it.toSummary() }
+        )
     }
 
     internal fun findJob(jobId: String): JobEntity =

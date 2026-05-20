@@ -7,6 +7,8 @@ import com.hireikon.hireikon_backend.dto.JobSummaryResponse
 import com.hireikon.hireikon_backend.dto.UpdateJobRequest
 import com.hireikon.hireikon_backend.service.JobService
 import com.hireikon.hireikon_backend.shared.ApiResponse
+import com.hireikon.hireikon_backend.shared.CursorPage
+import com.hireikon.hireikon_backend.shared.CursorRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -28,13 +30,17 @@ class JobController(
     private val jobService: JobService
 ) {
 
-    // GET /api/v1/jobs?keyword=kotlin&location=dhaka
+    // GET /api/v1/jobs?keyword=kotlin&location=dhaka&cursor=uuid&pageSize=20
     @GetMapping
     fun getOpenJobs(
         @RequestParam(required = false) keyword: String?,
-        @RequestParam(required = false) location: String?
-    ): ResponseEntity<ApiResponse<List<JobSummaryResponse>>> =
-        ResponseEntity.ok(ApiResponse.ok(jobService.getOpenJobs(keyword, location)))
+        @RequestParam(required = false) location: String?,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") pageSize: Int
+    ): ResponseEntity<ApiResponse<CursorPage<JobSummaryResponse>>> =
+        ResponseEntity.ok(ApiResponse.ok(
+            jobService.getOpenJobs(keyword, location, CursorRequest(cursor, pageSize))
+        ))
 
     // GET /api/v1/jobs/{id}
     @GetMapping("/{id}")
@@ -44,9 +50,15 @@ class JobController(
         ResponseEntity.ok(ApiResponse.ok(jobService.getJobById(id)))
 
     // GET /api/v1/jobs/my
+    // GET /api/v1/jobs/my?cursor=uuid&pageSize=20
     @GetMapping("/my")
-    fun getMyJobs(): ResponseEntity<ApiResponse<List<JobSummaryResponse>>> =
-        ResponseEntity.ok(ApiResponse.ok(jobService.getMyJobs(currentUserId())))
+    fun getMyJobs(
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") pageSize: Int
+    ): ResponseEntity<ApiResponse<CursorPage<JobSummaryResponse>>> =
+        ResponseEntity.ok(ApiResponse.ok(
+            jobService.getMyJobs(currentUserId(), CursorRequest(cursor, pageSize))
+        ))
 
     // POST /api/v1/jobs
     @PostMapping

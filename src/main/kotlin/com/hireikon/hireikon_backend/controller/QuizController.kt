@@ -7,6 +7,8 @@ import com.hireikon.hireikon_backend.dto.QuizResultResponse
 import com.hireikon.hireikon_backend.dto.SubmitQuizRequest
 import com.hireikon.hireikon_backend.service.QuizService
 import com.hireikon.hireikon_backend.shared.ApiResponse
+import com.hireikon.hireikon_backend.shared.CursorPage
+import com.hireikon.hireikon_backend.shared.CursorRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -64,19 +66,26 @@ class QuizController(
     ): ResponseEntity<ApiResponse<QuizResultResponse>> =
         ResponseEntity.ok(ApiResponse.ok(quizService.getQuizResult(currentUserId(), id)))
 
-    // GET /api/v1/quiz/history
+    // GET /api/v1/quiz/history?cursor=uuid&pageSize=20
     @GetMapping("/history")
-    fun getQuizHistory(): ResponseEntity<ApiResponse<List<QuizHistoryResponse>>> =
-        ResponseEntity.ok(ApiResponse.ok(quizService.getQuizHistory(currentUserId())))
+    fun getQuizHistory(
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") pageSize: Int
+    ): ResponseEntity<ApiResponse<CursorPage<QuizHistoryResponse>>> =
+        ResponseEntity.ok(ApiResponse.ok(
+            quizService.getQuizHistory(currentUserId(), CursorRequest(cursor, pageSize))
+        ))
 
-    // GET /api/v1/quiz/history?skillName=Kotlin
+    // GET /api/v1/quiz/history/skill?skillName=Kotlin&cursor=uuid&pageSize=20
     @GetMapping("/history/skill")
     fun getQuizHistoryBySkill(
-        @RequestParam skillName: String
-    ): ResponseEntity<ApiResponse<List<QuizHistoryResponse>>> =
-        ResponseEntity.ok(
-            ApiResponse.ok(quizService.getQuizHistoryBySkill(currentUserId(), skillName))
-        )
+        @RequestParam skillName: String,
+        @RequestParam(required = false) cursor: String?,
+        @RequestParam(defaultValue = "20") pageSize: Int
+    ): ResponseEntity<ApiResponse<CursorPage<QuizHistoryResponse>>> =
+        ResponseEntity.ok(ApiResponse.ok(
+            quizService.getQuizHistoryBySkill(currentUserId(), skillName, CursorRequest(cursor, pageSize))
+        ))
 
     private fun currentUserId(): String =
         SecurityContextHolder.getContext().authentication.principal as String

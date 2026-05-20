@@ -15,7 +15,28 @@ interface JobRepository: JpaRepository<JobEntity, String> {
         SELECT j FROM JobEntity j
         WHERE j.status = 'OPEN'
         AND (:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%')))
-        AND (:keyword  IS NULL OR LOWER(j.title)    LIKE LOWER(CONCAT('%', :keyword,  '%')))
+        AND (:keyword  IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword,  '%')))
+        AND (:cursor IS NULL OR j.postedAt < (SELECT j2.postedAt FROM JobEntity j2 WHERE j2.id = :cursor))
+        ORDER BY j.postedAt DESC
+        LIMIT :pageSize
     """)
-    fun searchJobs(location: String?, keyword: String?): List<JobEntity>
+    fun searchJobsCursor(
+        location: String?,
+        keyword: String?,
+        cursor: String?,
+        pageSize: Int
+    ): List<JobEntity>
+
+    @Query("""
+        SELECT j FROM JobEntity j
+        WHERE j.recruiter.id = :recruiterId
+        AND (:cursor IS NULL OR j.postedAt < (SELECT j2.postedAt FROM JobEntity j2 WHERE j2.id = :cursor))
+        ORDER BY j.postedAt DESC
+        LIMIT :pageSize
+    """)
+    fun findByRecruiterIdCursor(
+        recruiterId: String,
+        cursor: String?,
+        pageSize: Int
+    ): List<JobEntity>
 }

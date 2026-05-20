@@ -15,9 +15,12 @@ import com.hireikon.hireikon_backend.dto.JobSummaryResponse
 import com.hireikon.hireikon_backend.dto.MyApplicationResponse
 import com.hireikon.hireikon_backend.dto.UpdateApplicationStatusRequest
 import com.hireikon.hireikon_backend.shared.BadRequestException
+import com.hireikon.hireikon_backend.shared.CursorPage
+import com.hireikon.hireikon_backend.shared.CursorRequest
 import com.hireikon.hireikon_backend.shared.DuplicateResourceException
 import com.hireikon.hireikon_backend.shared.ResourceNotFoundException
 import com.hireikon.hireikon_backend.shared.UnauthorizedException
+import com.hireikon.hireikon_backend.shared.toCursorPage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -76,11 +79,19 @@ class ApplicationService(
     }
 
     @Transactional(readOnly = true)
-    fun getMyApplications(userId: String): List<MyApplicationResponse> {
+    fun getMyApplications(
+        userId: String,
+        cursorRequest: CursorRequest = CursorRequest()
+    ): CursorPage<MyApplicationResponse> {
         val profile = candidateProfileRepository.findByUserId(userId)
             .orElseThrow { ResourceNotFoundException("Candidate profile not found") }
-        return applicationRepository.findByCandidateId(profile.id)
-            .map { it.toMyResponse() }
+        val size  = cursorRequest.validatedPageSize
+        val items = applicationRepository.findByCandidateIdCursor(profile.id, cursorRequest.cursor, size + 1)
+        return items.toCursorPage(
+            pageSize = size,
+            idExtractor = { it.id },
+            mapper = { it.toMyResponse() }
+        )
     }
 
     @Transactional(readOnly = true)
@@ -96,18 +107,19 @@ class ApplicationService(
     fun getApplicants(
         userId: String,
         jobId: String,
-        status: ApplicationStatus? = null
-    ): List<ApplicantResponse> {
+        status: ApplicationStatus? = null,
+        cursorRequest: CursorRequest = CursorRequest()
+    ): CursorPage<ApplicantResponse> {
         val job = jobService.findJob(jobId)
-        val recruiter = job.recruiter
-        if (recruiter.user.id != userId) throw UnauthorizedException()
+        if (job.recruiter.user.id != userId) throw UnauthorizedException()
 
-        val applications = when {
-            status != null -> applicationRepository.findByJobIdAndStatus(jobId, status)
-            else -> applicationRepository.findByJobIdOrderByMatchScoreDesc(jobId)
-        }
-
-        return applications.map { it.toApplicantResponse() }
+        val size  = cursorRequest.validatedPageSize
+        val items = applicationRepository.findByJobIdCursor(jobId, status, cursorRequest.cursor, size + 1)
+        return items.toCursorPage(
+            pageSize = size,
+            idExtractor = { it.id },
+            mapper = { it.toApplicantResponse() }
+        )
     }
 
     @Transactional

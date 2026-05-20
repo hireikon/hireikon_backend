@@ -18,8 +18,11 @@ import com.hireikon.hireikon_backend.dto.QuizResultQuestionResponse
 import com.hireikon.hireikon_backend.dto.QuizResultResponse
 import com.hireikon.hireikon_backend.dto.SubmitQuizRequest
 import com.hireikon.hireikon_backend.shared.BadRequestException
+import com.hireikon.hireikon_backend.shared.CursorPage
+import com.hireikon.hireikon_backend.shared.CursorRequest
 import com.hireikon.hireikon_backend.shared.ResourceNotFoundException
 import com.hireikon.hireikon_backend.shared.UnauthorizedException
+import com.hireikon.hireikon_backend.shared.toCursorPage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -178,19 +181,36 @@ class QuizService(
 
     // Quiz history for a candidate
     @Transactional(readOnly = true)
-    fun getQuizHistory(userId: String): List<QuizHistoryResponse> {
+    fun getQuizHistory(
+        userId: String,
+        cursorRequest: CursorRequest = CursorRequest()
+    ): CursorPage<QuizHistoryResponse> {
         val profile = findProfile(userId)
-        return quizRepository.findByCandidateId(profile.id)
-            .map { it.toHistoryResponse() }
+        val size = cursorRequest.validatedPageSize
+        val items = quizRepository.findByCandidateIdCursor(profile.id, cursorRequest.cursor, size + 1)
+        return items.toCursorPage(
+            pageSize = size,
+            idExtractor = { it.id },
+            mapper = { it.toHistoryResponse() }
+        )
     }
 
     @Transactional(readOnly = true)
-    fun getQuizHistoryBySkill(userId: String, skillName: String): List<QuizHistoryResponse> {
+    fun getQuizHistoryBySkill(
+        userId: String,
+        skillName: String,
+        cursorRequest: CursorRequest = CursorRequest()
+    ): CursorPage<QuizHistoryResponse> {
         val profile = findProfile(userId)
         val skill = skillRepository.findByNameIgnoreCase(skillName)
             .orElseThrow { ResourceNotFoundException("Skill '$skillName' not found") }
-        return quizRepository.findByCandidateIdAndSkillId(profile.id, skill.id)
-            .map { it.toHistoryResponse() }
+        val size = cursorRequest.validatedPageSize
+        val items = quizRepository.findByCandidateIdAndSkillIdCursor(profile.id, skill.id, cursorRequest.cursor, size + 1)
+        return items.toCursorPage(
+            pageSize = size,
+            idExtractor = { it.id },
+            mapper = { it.toHistoryResponse() }
+        )
     }
 
     private fun findProfile(userId: String): CandidateProfileEntity =

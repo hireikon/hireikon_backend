@@ -15,14 +15,14 @@ Authorization: Bearer <candidateAccessToken>
 
 ## Endpoints Summary
 
-| Endpoint                          | Method | Description                             |
-|-----------------------------------|--------|-----------------------------------------|
-| `/quiz/generate`                  | POST   | Generate a new quiz for a skill         |
-| `/quiz/{id}`                      | GET    | Get quiz questions (no correct answers) |
-| `/quiz/{id}/submit`               | POST   | Submit answers and get scored result    |
-| `/quiz/{id}/result`               | GET    | Get result of a submitted quiz          |
-| `/quiz/history`                   | GET    | Get all quizzes taken                   |
-| `/quiz/history/skill?skillName=X` | GET    | Get quizzes filtered by skill           |
+| Endpoint                                            | Method | Description                               |
+|-----------------------------------------------------|--------|-------------------------------------------|
+| `/quiz/generate`                                    | POST   | Generate a new quiz for a skill           |
+| `/quiz/{id}`                                        | GET    | Get quiz questions (no correct answers)   |
+| `/quiz/{id}/submit`                                 | POST   | Submit answers and get scored result      |
+| `/quiz/{id}/result`                                 | GET    | Get result of a submitted quiz            |
+| `/quiz/history`                                     | GET    | Get all quizzes taken (paginated)         |
+| `/quiz/history/skill?skillName=X&cursor=&pageSize=` | GET    | Get quizzes filtered by skill (paginated) |
 
 ---
 
@@ -315,43 +315,47 @@ GET /api/v1/quiz/{id}/result
 
 ### 5. Get Quiz History
 
-Returns all quizzes ever taken by the authenticated candidate across all skills, including submission status and score.
+Returns all quizzes taken by the authenticated candidate, sorted by most recent first. Paginated.
 
 ```
-GET /api/v1/quiz/history
+GET /api/v1/quiz/history?cursor={cursor}&pageSize={pageSize}
 ```
+
+**Query Parameters:**
+
+| Param      | Type          | Required | Default | Description                                             |
+|------------|---------------|----------|---------|---------------------------------------------------------|
+| `cursor`   | string (UUID) | ❌        | `null`  | ID of last item from previous page. Omit for first page |
+| `pageSize` | integer       | ❌        | `20`    | Items per page. Min 1, max 100                          |
 
 **Success Response — `200 OK`:**
 ```json
 {
   "success": true,
   "message": "Success",
-  "data": [
-    {
-      "id": "quiz-uuid-1",
-      "skillName": "Kotlin",
-      "proficiencyLevel": "INTERMEDIATE",
-      "score": 80,
-      "submitted": true,
-      "takenAt": "2026-05-01T10:00:00"
-    },
-    {
-      "id": "quiz-uuid-2",
-      "skillName": "Spring Boot",
-      "proficiencyLevel": "ADVANCED",
-      "score": null,
-      "submitted": false,
-      "takenAt": "2026-05-01T11:00:00"
-    },
-    {
-      "id": "quiz-uuid-3",
-      "skillName": "Kotlin",
-      "proficiencyLevel": "EXPERT",
-      "score": 60,
-      "submitted": true,
-      "takenAt": "2026-05-02T09:00:00"
-    }
-  ],
+  "data": {
+    "data": [
+      {
+        "id": "quiz-uuid-1",
+        "skillName": "Kotlin",
+        "proficiencyLevel": "INTERMEDIATE",
+        "score": 80,
+        "submitted": true,
+        "takenAt": "2026-05-01T10:00:00"
+      },
+      {
+        "id": "quiz-uuid-2",
+        "skillName": "Spring Boot",
+        "proficiencyLevel": "ADVANCED",
+        "score": null,
+        "submitted": false,
+        "takenAt": "2026-05-01T11:00:00"
+      }
+    ],
+    "nextCursor": "quiz-uuid-2",
+    "hasMore": true,
+    "pageSize": 20
+  },
   "errors": null
 }
 ```
@@ -362,41 +366,49 @@ GET /api/v1/quiz/history
 
 ### 6. Get Quiz History by Skill
 
-Returns only quizzes for a specific skill. Useful for tracking score progression over multiple attempts.
+Returns quizzes for a specific skill, sorted by most recent first. Useful for tracking score progression. Paginated.
 
 ```
-GET /api/v1/quiz/history/skill?skillName=Kotlin
+GET /api/v1/quiz/history/skill?skillName=Kotlin&cursor={cursor}&pageSize={pageSize}
 ```
 
 **Query Parameters:**
 
-| Param       | Type   | Required | Description                                          |
-|-------------|--------|----------|------------------------------------------------------|
-| `skillName` | string | ✅        | Must match an existing skill name (case-insensitive) |
+| Param       | Type          | Required | Default | Description                                          |
+|-------------|---------------|----------|---------|------------------------------------------------------|
+| `skillName` | string        | ✅        | —       | Must match an existing skill name (case-insensitive) |
+| `cursor`    | string (UUID) | ❌        | `null`  | ID of last item from previous page                   |
+| `pageSize`  | integer       | ❌        | `20`    | Items per page. Min 1, max 100                       |
 
 **Success Response — `200 OK`:**
+
 ```json
 {
   "success": true,
   "message": "Success",
-  "data": [
-    {
-      "id": "quiz-uuid-1",
-      "skillName": "Kotlin",
-      "proficiencyLevel": "INTERMEDIATE",
-      "score": 60,
-      "submitted": true,
-      "takenAt": "2026-05-01T10:00:00"
-    },
-    {
-      "id": "quiz-uuid-3",
-      "skillName": "Kotlin",
-      "proficiencyLevel": "EXPERT",
-      "score": 80,
-      "submitted": true,
-      "takenAt": "2026-05-02T09:00:00"
-    }
-  ],
+  "data":  {
+    "data": [
+      {
+        "id": "quiz-uuid-1",
+        "skillName": "Kotlin",
+        "proficiencyLevel": "INTERMEDIATE",
+        "score": 60,
+        "submitted": true,
+        "takenAt": "2026-05-01T10:00:00"
+      },
+      {
+        "id": "quiz-uuid-3",
+        "skillName": "Kotlin",
+        "proficiencyLevel": "EXPERT",
+        "score": 80,
+        "submitted": true,
+        "takenAt": "2026-05-02T09:00:00"
+      }
+    ],
+    "nextCursor": null,
+    "hasMore": false,
+    "pageSize": 20
+  },
   "errors": null
 }
 ```
