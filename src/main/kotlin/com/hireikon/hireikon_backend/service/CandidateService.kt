@@ -35,7 +35,7 @@ class CandidateService(
     private val candidateSkillRepository: CandidateSkillRepository,
     private val experienceRepository: ExperienceRepository,
     private val educationRepository: EducationRepository,
-    private val storageService: StorageService
+    private val resumeStorageService: ResumeStorageService
 ) {
     fun getProfile(userId: String): CandidateProfileResponse {
         val profile = findProfileByUserId(userId)
@@ -59,7 +59,7 @@ class CandidateService(
     @Transactional
     fun uploadResume(userId: String, file: MultipartFile): ResumeUploadResponse {
         val profile = findProfileByUserId(userId)
-        val resumeUrl = storageService.uploadResume(file, userId)
+        val resumeUrl = resumeStorageService.uploadResume(file, userId)
 
         profile.resumeUrl = resumeUrl
         candidateProfileRepository.save(profile)
@@ -73,7 +73,7 @@ class CandidateService(
 
         if (profile.resumeUrl == null) throw BadRequestException("No resume found to delete")
 
-        storageService.deleteResume(userId)
+        resumeStorageService.deleteResume(userId)
         profile.resumeUrl = null
         candidateProfileRepository.save(profile)
     }
@@ -82,6 +82,20 @@ class CandidateService(
     fun saveResumeUrl(userId: String, resumeUrl: String) {
         val profile = findProfileByUserId(userId)
         profile.resumeUrl = resumeUrl
+        candidateProfileRepository.save(profile)
+    }
+
+    @Transactional
+    fun saveAvatarUrl(userId: String, avatarUrl: String) {
+        val profile = findProfileByUserId(userId)
+        profile.avatarUrl = avatarUrl
+        candidateProfileRepository.save(profile)
+    }
+
+    @Transactional
+    fun deleteAvatarUrl(userId: String) {
+        val profile = findProfileByUserId(userId)
+        profile.avatarUrl = null
         candidateProfileRepository.save(profile)
     }
 
@@ -278,6 +292,7 @@ class CandidateService(
         fullName = fullName,
         phone = phone,
         location = location,
+        avatarUrl = avatarUrl,
         resumeUrl = resumeUrl,
         linkedinUrl = linkedinUrl,
         githubUrl = githubUrl,

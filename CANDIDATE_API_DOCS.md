@@ -21,6 +21,8 @@ Authorization: Bearer <accessToken>
 | `/profile`          | PUT    | Update profile info      |
 | `/resume`           | POST   | Upload PDF resume        |
 | `/resume`           | DELETE | Delete resume            |
+| `/avatar`           | POST   | Upload profile photo     |
+| `/avatar`           | DELETE | Delete profile photo     |
 | `/skills`           | GET    | Get all skills           |
 | `/skills`           | POST   | Add a skill              |
 | `/skills/{id}`      | PATCH  | Update skill proficiency |
@@ -57,6 +59,7 @@ GET /api/v1/candidate/profile
     "fullName": "Rahim Uddin",
     "phone": "+8801712345678",
     "location": "Dhaka, Bangladesh",
+    "avatarUrl": "https://xyz.supabase.co/.../profile_avatars/candidate/user-uuid.jpg",
     "resumeUrl": "https://arjnikafdfwrkqfgsnzf.supabase.co/storage/v1/object/public/resumes/user-uuid/resume.pdf",
     "linkedinUrl": "https://linkedin.com/in/rahimuddin",
     "summary": "Passionate backend developer with 2 years of experience.",
@@ -79,13 +82,13 @@ Content-Type: application/json
 
 **Request Body:**
 
-| Field | Type | Required | Constraints |
-|---|---|---|---|
-| `fullName` | string | ✅ | Max 100 chars |
-| `phone` | string | ❌ | Max 20 chars |
-| `location` | string | ❌ | Max 100 chars |
-| `linkedinUrl` | string | ❌ | Max 255 chars |
-| `summary` | string | ❌ | No limit |
+| Field         | Type   | Required | Constraints   |
+|---------------|--------|----------|---------------|
+| `fullName`    | string | ✅        | Max 100 chars |
+| `phone`       | string | ❌        | Max 20 chars  |
+| `location`    | string | ❌        | Max 100 chars |
+| `linkedinUrl` | string | ❌        | Max 255 chars |
+| `summary`     | string | ❌        | No limit      |
 
 **Example:**
 ```json
@@ -182,6 +185,64 @@ DELETE /api/v1/candidate/resume
 | Status | Scenario                   | Message                       |
 |--------|----------------------------|-------------------------------|
 | `400`  | No resume exists to delete | `"No resume found to delete"` |
+
+---
+
+### Upload Profile Photo
+
+Uploads a profile photo. Automatically compressed and resized to max 400×400 pixels. Re-uploading replaces the existing photo.
+
+```
+POST /api/v1/candidate/avatar
+Content-Type: multipart/form-data
+```
+
+**Form Data:**
+
+| Key | Type | Required | Constraints |
+|---|---|---|---|
+| `file` | File | ✅ | JPEG, PNG or WebP. Max 5MB |
+
+**Compression details:**
+- Resized to max 400×400 (aspect ratio preserved)
+- Re-encoded as JPEG at 82% quality
+- All formats (PNG, WebP) converted to JPEG on save
+
+**Success Response — `200 OK`:**
+```json
+{
+  "success": true,
+  "message": "Profile photo uploaded successfully",
+  "data": {
+    "avatarUrl": "https://xyz.supabase.co/storage/v1/object/public/resumes/avatars/candidate/user-uuid.jpg"
+  }
+}
+```
+
+**Error Responses:**
+
+| Status | Scenario        | Message                                             |
+|--------|-----------------|-----------------------------------------------------|
+| `400`  | Wrong file type | `"Only JPEG, PNG and WebP images are allowed."`     |
+| `400`  | File too large  | `"Image size must not exceed 5MB"`                  |
+| `400`  | Corrupted image | `"Could not read image file — it may be corrupted"` |
+
+---
+
+### Delete Profile Photo
+
+```
+DELETE /api/v1/candidate/avatar
+```
+
+**Success Response — `200 OK`:**
+```json
+{
+  "success": true,
+  "message": "Profile photo deleted successfully",
+  "data": null
+}
+```
 
 ---
 

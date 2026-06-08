@@ -11,6 +11,7 @@ import com.hireikon.hireikon_backend.dto.ExperienceResponse
 import com.hireikon.hireikon_backend.dto.ResumeUploadResponse
 import com.hireikon.hireikon_backend.dto.UpdateProfileRequest
 import com.hireikon.hireikon_backend.service.CandidateService
+import com.hireikon.hireikon_backend.service.ImageStorageService
 import com.hireikon.hireikon_backend.shared.ApiResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -32,7 +33,8 @@ import org.springframework.web.multipart.MultipartFile
 @RestController
 @RequestMapping("/api/v1/candidate")
 class CandidateController(
-    private val candidateService: CandidateService
+    private val candidateService: CandidateService,
+    private val imageStorageService: ImageStorageService
 ) {
 
     // GET /api/v1/candidate/profile
@@ -72,6 +74,29 @@ class CandidateController(
         val userId = currentUserId()
         candidateService.deleteResume(userId)
         return ResponseEntity.ok(ApiResponse.ok(null, "Resume deleted successfully"))
+    }
+
+    // POST /api/v1/candidate/avatar
+    @PostMapping("/avatar", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    fun uploadAvatar(
+        @RequestParam("file") file: MultipartFile
+    ): ResponseEntity<ApiResponse<Map<String, String>>> {
+        val userId = currentUserId()
+        val avatarUrl = imageStorageService.uploadProfilePhoto(file, userId, "candidate")
+        candidateService.saveAvatarUrl(userId, avatarUrl)
+        return ResponseEntity.ok(ApiResponse.ok(
+            data = mapOf("avatarUrl" to avatarUrl),
+            message = "Profile photo uploaded successfully"
+        ))
+    }
+
+    // DELETE /api/v1/candidate/avatar
+    @DeleteMapping("/avatar")
+    fun deleteAvatar(): ResponseEntity<ApiResponse<Nothing?>> {
+        val userId = currentUserId()
+        imageStorageService.deleteProfilePhoto(userId, "candidate")
+        candidateService.deleteAvatarUrl(userId)
+        return ResponseEntity.ok(ApiResponse.ok(null, "Profile photo deleted successfully"))
     }
 
     // GET /api/v1/candidate/skills

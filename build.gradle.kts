@@ -39,6 +39,9 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
 
+	implementation("org.imgscalr:imgscalr-lib:4.2")
+	implementation("org.apache.commons:commons-imaging:1.0.0-alpha5")
+
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	testImplementation("io.projectreactor:reactor-test")
 	testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test")

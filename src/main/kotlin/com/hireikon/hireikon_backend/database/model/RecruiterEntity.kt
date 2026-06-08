@@ -23,11 +23,29 @@ class RecruiterEntity(
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     var user: UserEntity = UserEntity(),
 
+    @Column(name = "full_name", nullable = false)
+    var fullName: String = "",
+
     @Column(name = "company_name", nullable = false)
     var companyName: String = "",
 
     @Column(nullable = false)
     var position: String = "",
+
+    @Column(name = "avatar_url")
+    var avatarUrl: String? = null,
+
+    @Column(name = "company_website")
+    var companyWebsite: String? = null,
+
+    @Column(name = "linkedin_url")
+    var linkedinUrl: String? = null,
+
+    @Column
+    var location: String? = null,
+
+    @Column(columnDefinition = "TEXT")
+    var bio: String? = null,
 
     @OneToMany(mappedBy = "recruiter", cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
     var jobs: MutableList<JobEntity> = mutableListOf()

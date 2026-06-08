@@ -33,6 +33,7 @@ data class CandidateProfileResponse(
     val fullName: String,
     val phone: String?,
     val location: String?,
+    val avatarUrl: String?,
     val resumeUrl: String?,
     val linkedinUrl: String?,
     val githubUrl: String?,

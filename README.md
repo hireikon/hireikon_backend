@@ -119,6 +119,7 @@ Server starts at `https://hireikon-backend.onrender.com` - live
 
 **1. Create storage bucket:**
 Supabase Dashboard → Storage → New bucket → Name: `resumes` → Public: ✅ ON
+Supabase Dashboard → Storage → New bucket → Name: `profile_avatars` → Public: ✅ ON
 
 **2. Add RLS policy:**
 
@@ -129,6 +130,14 @@ ON storage.objects
 FOR ALL
 USING (bucket_id = 'resumes')
 WITH CHECK (bucket_id = 'resumes');
+```
+```sql
+CREATE
+POLICY "Allow all operations on profile_avatars"
+ON storage.objects
+FOR ALL
+USING (bucket_id = 'profile_avatars')
+WITH CHECK (bucket_id = 'profile_avatars');
 ```
 
 ---
@@ -216,6 +225,8 @@ Pass `nextCursor` as `cursor` in the next request. When `hasMore` is `false`, yo
 | PUT    | `/profile`          | Update profile info                                   |
 | POST   | `/resume`           | Upload PDF resume to Supabase Storage                 |
 | DELETE | `/resume`           | Delete resume                                         |
+| POST   | `/avatar`           | Upload profile photo                                  |
+| DELETE | `/avatar`           | Delete profile photo                                  |
 | GET    | `/skills`           | List all skills                                       |
 | POST   | `/skills`           | Add a skill                                           |
 | PATCH  | `/skills/{id}`      | Update skill proficiency                              |
@@ -228,6 +239,17 @@ Pass `nextCursor` as `cursor` in the next request. When `hasMore` is `false`, yo
 | POST   | `/educations`       | Add education                                         |
 | PUT    | `/educations/{id}`  | Update education                                      |
 | DELETE | `/educations/{id}`  | Delete education                                      |
+
+---
+
+### Recruiter `/api/v1/recruiter` — `RECRUITER` role
+
+| Method | Endpoint   | Description                                       |
+|--------|------------|---------------------------------------------------|
+| GET    | `/profile` | Get recruiter profile with job stats              |
+| PUT    | `/profile` | Update profile info                               |
+| POST   | `/avatar`  | Upload profile photo (compressed to 400×400 JPEG) |
+| DELETE | `/avatar`  | Delete profile photo                              |
 
 ---
 
@@ -318,6 +340,7 @@ roadmap with resources per skill.
 | Duplicate key on job skill update                  | `@Modifying deleteByJobId()` + `flush()` before re-insert     |
 | 403 on recruiter application routes                | Reordered `SecurityConfig` rules — specific before general    |
 | Quiz result showing empty `candidateAnswer`        | Store answers as JSONB on submit, read back on result         |
+| PNG/WebP avatar upload fails as JPEG               | Convert to RGB BufferedImage before JPEG encoding             |
 
 ---
 
@@ -327,6 +350,7 @@ roadmap with resources per skill.
 |-------------------------------|----------------------------------------------------------|
 | `AUTH_API_DOCS.md`            | Auth endpoints — register, login, refresh, logout        |
 | `CANDIDATE_API_DOCS.md`       | Candidate profile, resume, skills, experience, education |
+| `RECRUITER_API_DOCS.md`       | Recruiter profile and photo management                   |
 | `AI_API_DOCS.md`              | Resume parsing, skill gap analysis, quiz generation      |
 | `JOB_APPLICATION_API_DOCS.md` | Job posting, browsing, applying, recruiter dashboard     |
 | `QUIZ_API_DOCS.md`            | Quiz generation, submission, results, history            |

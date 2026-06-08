@@ -7,7 +7,7 @@ import com.hireikon.hireikon_backend.database.model.enums.ProficiencyLevel
 import com.hireikon.hireikon_backend.dto.GeneratedQuizDto
 import com.hireikon.hireikon_backend.dto.ParsedResumeDto
 import com.hireikon.hireikon_backend.dto.SkillGapReportDto
-import com.hireikon.hireikon_backend.service.StorageService
+import com.hireikon.hireikon_backend.service.ResumeStorageService
 import com.hireikon.hireikon_backend.shared.ApiResponse
 import com.hireikon.hireikon_backend.shared.BadRequestException
 import org.springframework.http.MediaType
@@ -26,7 +26,7 @@ class AiController(
     private val resumeParser: ResumeParser,
     private val skillGapAnalyzer: SkillGapAnalyzer,
     private val quizGenerator: QuizGenerator,
-    private val storageService: StorageService
+    private val resumeStorageService: ResumeStorageService
 ) {
 
     // POST /api/v1/ai/resume/parse
@@ -56,7 +56,7 @@ class AiController(
         }
         val userId = currentUserId()
 
-        val resumeUrl = storageService.uploadResume(file, userId)
+        val resumeUrl = resumeStorageService.uploadResume(file, userId)
         val parsed = resumeParser.parseAndPopulateProfile(file.bytes, userId, resumeUrl)
 
         return ResponseEntity.ok(

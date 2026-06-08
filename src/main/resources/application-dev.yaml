@@ -29,6 +29,7 @@ app:
   supabase:
     url: ${SUPABASE_URL}
     anon-key: ${SUPABASE_ANON_KEY}
-    storage-bucket: resumes
+    resume-storage-bucket: resumes
+    profile-avatar-storage-bucket: profile_avatars
   cors:
     allowed-origins: "http://localhost:3000,http://localhost:3001"

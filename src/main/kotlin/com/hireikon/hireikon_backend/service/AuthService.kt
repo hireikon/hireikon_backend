@@ -69,6 +69,7 @@ class AuthService(
             UserRole.RECRUITER -> {
                 val recruiter = RecruiterEntity(
                     user = user,
+                    fullName = request.fullName,
                     companyName = request.companyName!!,
                     position = request.position!!
                 )
@@ -137,7 +138,7 @@ class AuthService(
                 .orElse(user.email)
             UserRole.RECRUITER -> recruiterRepository
                 .findByUserId(user.id)
-                .map { it.companyName }
+                .map { it.fullName }
                 .orElse(user.email)
             UserRole.ADMIN -> "Admin"
         }

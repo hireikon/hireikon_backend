@@ -33,6 +33,9 @@ class CandidateProfileEntity(
     @Column
     var location: String? = null,
 
+    @Column(name = "avatar_url")
+    var avatarUrl: String? = null,
+
     @Column(name = "resume_url")
     var resumeUrl: String? = null,
 

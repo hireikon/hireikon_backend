@@ -9,10 +9,10 @@ import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
 @Service
-class StorageService(
+class ResumeStorageService(
     @Value("\${app.supabase.url}") private val supabaseUrl: String,
     @Value("\${app.supabase.anon-key}") private val supabaseAnonKey: String,
-    @Value("\${app.supabase.storage-bucket}") private val bucket: String
+    @Value("\${app.supabase.resume-storage-bucket}") private val bucket: String
 ) {
     private val webClient = WebClient.builder()
         .baseUrl("$supabaseUrl/storage/v1")
