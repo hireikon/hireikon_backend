@@ -30,4 +30,10 @@ app:
     resume-storage-bucket: resumes
     profile-avatar-storage-bucket: profile_avatars
   cors:
-    allowed-origins: "${FRONTEND_URL}"
+    allowed-origins: "${APP_BASE_URL}"
+  resend:
+    api-key: ${RESEND_API_KEY}
+    from: "Hireikon <noreply@hireikon.com>"
+  base-url: ${APP_BASE_URL}
+  password-reset:
+    expiry-minutes: 15

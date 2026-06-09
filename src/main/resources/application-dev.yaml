@@ -33,3 +33,9 @@ app:
     profile-avatar-storage-bucket: profile_avatars
   cors:
     allowed-origins: "http://localhost:3000,http://localhost:3001"
+  resend:
+    api-key: ${RESEND_API_KEY}
+    from: "Hireikon <onboarding@resend.dev>"
+  base-url: "http://localhost:3000"
+  password-reset:
+    expiry-minutes: 2

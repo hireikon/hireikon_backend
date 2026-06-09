@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
-// Register
-
 data class RegisterRequest(
     @field:NotBlank(message = "Email is required")
     @field:Email(message = "Must be a valid email")
@@ -30,8 +28,6 @@ data class RegisterRequest(
     val position: String? = null
 )
 
-// Login
-
 data class LoginRequest(
     @field:NotBlank(message = "Email is required")
     @field:Email(message = "Must be a valid email")
@@ -41,14 +37,28 @@ data class LoginRequest(
     val password: String
 )
 
-// Refresh Token
-
 data class RefreshTokenRequest(
     @field:NotBlank(message = "Refresh token is required")
     val refreshToken: String
 )
 
-// Responses
+data class ForgotPasswordRequest(
+    @field:NotBlank(message = "Email is required")
+    @field:Email(message = "Must be a valid email")
+    val email: String
+)
+
+data class ResetPasswordRequest(
+    @field:NotBlank(message = "Token is required")
+    val token: String,
+
+    @field:NotBlank(message = "Password is required")
+    @field:Pattern(
+        regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).{9,}$",
+        message = "Password must be at least 9 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character."
+    )
+    val newPassword: String
+)
 
 data class AuthResponse(
     val accessToken: String,

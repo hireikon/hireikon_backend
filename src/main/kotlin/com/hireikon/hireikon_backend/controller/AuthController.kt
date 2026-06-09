@@ -1,12 +1,15 @@
 package com.hireikon.hireikon_backend.controller
 
 import com.hireikon.hireikon_backend.dto.AuthResponse
+import com.hireikon.hireikon_backend.dto.ForgotPasswordRequest
 import com.hireikon.hireikon_backend.dto.LoginRequest
 import com.hireikon.hireikon_backend.dto.RefreshTokenRequest
 import com.hireikon.hireikon_backend.dto.RegisterRequest
+import com.hireikon.hireikon_backend.dto.ResetPasswordRequest
 import com.hireikon.hireikon_backend.dto.UserSummary
 import com.hireikon.hireikon_backend.security.JwtService
 import com.hireikon.hireikon_backend.service.AuthService
+import com.hireikon.hireikon_backend.service.ForgotPasswordService
 import com.hireikon.hireikon_backend.shared.ApiResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -23,7 +26,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/auth")
 class AuthController(
     private val authService: AuthService,
-    private val jwtService: JwtService
+    private val jwtService: JwtService,
+    private val forgotPasswordService: ForgotPasswordService
 ) {
 
     // POST /api/v1/auth/register
@@ -58,6 +62,30 @@ class AuthController(
         val response = authService.refresh(request)
         return ResponseEntity.ok(ApiResponse.ok(
             response, "Token refreshed"
+        ))
+    }
+
+    // POST /api/v1/auth/forgot-password
+    @PostMapping("/forgot-password")
+    fun forgotPassword(
+        @Valid @RequestBody request: ForgotPasswordRequest
+    ): ResponseEntity<ApiResponse<Nothing?>> {
+        forgotPasswordService.requestResetPassword(request.email)
+        return ResponseEntity.ok(ApiResponse.ok(
+            data = null,
+            message = "If an account with that email exists, a reset link has been sent."
+        ))
+    }
+
+    // POST /api/v1/auth/reset-password
+    @PostMapping("/reset-password")
+    fun resetPassword(
+        @Valid @RequestBody request: ResetPasswordRequest
+    ): ResponseEntity<ApiResponse<Nothing?>> {
+        forgotPasswordService.resetPassword(request.token, request.newPassword)
+        return ResponseEntity.ok(ApiResponse.ok(
+            data = null,
+            message = "Password reset successfully. Please log in again."
         ))
     }
 

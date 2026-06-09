@@ -100,15 +100,16 @@ src/main/kotlin/com/hireikon/hireikon_backend/
 
 ### Environment Variables
 
-| Variable                        | Description                         |
-|---------------------------------|-------------------------------------|
-| `POSTGRES_PASSWORD`             | Supabase database password          |
-| `ENCODED_JWT_SECRET_KEY_BASE64` | HS512 signing secret (min 32 chars) |
-| `SPRING_PROFILES_ACTIVE`        | Active Profile (dev or prod)        |
-| `FRONTEND_URL`                  | Frontend url to make requests       |
-| `GEMINI_API_KEY`                | Google Gemini API key               |
-| `SUPABASE_URL`                  | e.g. `https://xyz.supabase.co`      |
-| `SUPABASE_ANON_KEY`             | Supabase project anon key           |
+| Variable                        | Description                                                                          |
+|---------------------------------|--------------------------------------------------------------------------------------|
+| `POSTGRES_PASSWORD`             | Supabase database password                                                           |
+| `ENCODED_JWT_SECRET_KEY_BASE64` | HS512 signing secret (min 32 chars)                                                  |
+| `SPRING_PROFILES_ACTIVE`        | Active Profile (dev or prod)                                                         |
+| `APP_BASE_URL`                  | Frontend base URL to make requests & used in email links e.g. `https://hireikon.com` |
+| `RESEND_API_KEY`                | Resend API key for sending emails                                                    |
+| `GEMINI_API_KEY`                | Google Gemini API key                                                                |
+| `SUPABASE_URL`                  | e.g. `https://xyz.supabase.co`                                                       |
+| `SUPABASE_ANON_KEY`             | Supabase project anon key                                                            |
 
 ### Run Locally
 
@@ -200,14 +201,16 @@ Pass `nextCursor` as `cursor` in the next request. When `hasMore` is `false`, yo
 
 ### Auth `/api/v1/auth`
 
-| Method | Endpoint      | Auth | Description                     |
-|--------|---------------|------|---------------------------------|
-| POST   | `/register`   | ❌    | Register candidate or recruiter |
-| POST   | `/login`      | ❌    | Login and get tokens            |
-| POST   | `/refresh`    | ❌    | Rotate refresh token            |
-| GET    | `/me`         | ✅    | Get current user from JWT       |
-| POST   | `/logout`     | ✅    | Invalidate current session      |
-| POST   | `/logout-all` | ✅    | Invalidate all sessions         |
+| Method | Endpoint           | Auth | Description                     |
+|--------|--------------------|------|---------------------------------|
+| POST   | `/register`        | ❌    | Register candidate or recruiter |
+| POST   | `/login`           | ❌    | Login and get tokens            |
+| POST   | `/refresh`         | ❌    | Rotate refresh token            |
+| POST   | `/forgot-password` | ❌    | Send password reset email       |
+| POST   | `/reset-password`  | ❌    | Reset password with token       |
+| GET    | `/me`              | ✅    | Get current user from JWT       |
+| POST   | `/logout`          | ✅    | Invalidate current session      |
+| POST   | `/logout-all`      | ✅    | Invalidate all sessions         |
 
 **Token strategy:**
 
