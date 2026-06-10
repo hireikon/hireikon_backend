@@ -6,6 +6,7 @@ import com.hireikon.hireikon_backend.database.model.EducationEntity
 import com.hireikon.hireikon_backend.database.model.ExperienceEntity
 import com.hireikon.hireikon_backend.database.model.SkillEntity
 import com.hireikon.hireikon_backend.database.model.enums.ProficiencyLevel
+import com.hireikon.hireikon_backend.database.repository.ApplicationRepository
 import com.hireikon.hireikon_backend.database.repository.CandidateProfileRepository
 import com.hireikon.hireikon_backend.database.repository.CandidateSkillRepository
 import com.hireikon.hireikon_backend.database.repository.EducationRepository
@@ -35,6 +36,7 @@ class CandidateService(
     private val candidateSkillRepository: CandidateSkillRepository,
     private val experienceRepository: ExperienceRepository,
     private val educationRepository: EducationRepository,
+    private val applicationRepository: ApplicationRepository,
     private val resumeStorageService: ResumeStorageService
 ) {
     fun getProfile(userId: String): CandidateProfileResponse {
@@ -297,6 +299,7 @@ class CandidateService(
         linkedinUrl = linkedinUrl,
         githubUrl = githubUrl,
         summary = summary,
+        totalApplications = applicationRepository.countByCandidateId(id),
         skills = candidateSkillRepository.findByCandidateId(id).map { it.toResponse() },
         experiences = experienceRepository.findByCandidateIdOrderByStartDateDesc(id).map { it.toResponse() },
         educations = educationRepository.findByCandidateIdOrderByGraduationDateDesc(id).map { it.toResponse() }

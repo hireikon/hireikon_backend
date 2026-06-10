@@ -11,6 +11,7 @@ interface ApplicationRepository: JpaRepository<ApplicationEntity, String> {
     fun findByCandidateId(candidateId: String): List<ApplicationEntity>
     fun findByJobId(jobId: String): List<ApplicationEntity>
     fun existsByCandidateIdAndJobId(candidateId: String, jobId: String): Boolean
+    fun countByCandidateId(candidateId: String): Int
 
     // Recruiter dashboard — top candidates for a job, sorted by match score
     @Query("""

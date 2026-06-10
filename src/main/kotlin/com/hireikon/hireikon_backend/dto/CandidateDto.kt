@@ -38,6 +38,7 @@ data class CandidateProfileResponse(
     val linkedinUrl: String?,
     val githubUrl: String?,
     val summary: String?,
+    val totalApplications: Int,
     val skills: List<CandidateSkillResponse>,
     val experiences: List<ExperienceResponse>,
     val educations: List<EducationResponse>

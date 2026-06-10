@@ -11,20 +11,10 @@ JSON Web Tokens)** for stateless authentication with a **refresh token rotation*
 
 ```json
 {
-  "success": true
-  |
-  false,
+  "success": true | false,
   "message": "string",
-  "data": {
-    ...
-  }
-  |
-  null,
-  "errors": [
-    "string"
-  ]
-  |
-  null
+  "data": { ... } | null,
+  "errors": [ "string" ] | null
 }
 ```
 
@@ -410,7 +400,55 @@ Authorization: Bearer <accessToken>
 
 ---
 
-### 7. Forgot Password
+### 7. Update Password
+
+Updates the password for the currently authenticated user. Requires the current password for verification. All existing sessions are invalidated after a successful update — the user must log in again.
+
+```
+PATCH /api/v1/auth/password
+Authorization: Bearer <accessToken>
+Content-Type: application/json
+```
+
+**Request Body:**
+
+| Field             | Type   | Required | Constraints                                |
+|-------------------|--------|----------|--------------------------------------------|
+| `currentPassword` | string | ✅        | Must match the current account password    |
+| `newPassword`     | string | ✅        | Min 8 characters, must differ from current |
+
+**Example:**
+```json
+{
+  "currentPassword": "oldpassword123",
+  "newPassword": "newpassword456"
+}
+```
+
+**Success Response — `200 OK`:**
+```json
+{
+  "success": true,
+  "message": "Password updated successfully. Please log in again.",
+  "data": null,
+  "errors": null
+}
+```
+
+**Error Responses:**
+
+| Status | Scenario                   | Message                                                       |
+|--------|----------------------------|---------------------------------------------------------------|
+| `400`  | Wrong current password     | `"Current password is incorrect"`                             |
+| `400`  | Same as current password   | `"New password must be different from your current password"` |
+| `400`  | New password too short     | `"newPassword: New password must be at least 8 characters"`   |
+| `401`  | No or invalid access token | Unauthorized                                                  |
+
+> **Note:** The current access token remains valid until it naturally expires. Only refresh tokens are invalidated — so the user stays logged in briefly but cannot silently refresh after expiry.
+
+---
+
+### 8. Forgot Password
 
 Sends a password reset email to the provided address. Always returns `200 OK` regardless of whether the email exists —
 this prevents attackers from discovering which emails are registered.
@@ -461,7 +499,7 @@ Token expires in **15 minutes**. Only one active token per user — requesting a
 
 ---
 
-### 8. Reset Password
+### 9. Reset Password
 
 Resets the user's password using the token from the email link. The token is single-use and deleted immediately after a
 successful reset. All existing sessions (refresh tokens) are also invalidated — the user must log in again on all
@@ -584,16 +622,17 @@ Sending a request to a role-restricted route with the wrong role returns:
 
 ## Quick Reference
 
-| Endpoint                       | Method | Auth Required  | Purpose                      |
-|--------------------------------|--------|----------------|------------------------------|
-| `/api/v1/auth/register`        | POST   | ❌              | Create new account           |
-| `/api/v1/auth/login`           | POST   | ❌              | Login + get tokens           |
-| `/api/v1/auth/refresh`         | POST   | ❌              | Rotate tokens                |
-| `/api/v1/auth/forgot-password` | POST   | ❌              | Request password reset email |
-| `/api/v1/auth/reset-password`  | POST   | ❌              | Reset password with token    |
-| `/api/v1/auth/me`              | GET    | ✅ Access token | Get current user             |
-| `/api/v1/auth/logout`          | POST   | ✅ Access token | Logout current session       |
-| `/api/v1/auth/logout-all`      | POST   | ✅ Access token | Logout all sessions          |
+| Endpoint                       | Method | Auth Required  | Purpose                                     |
+|--------------------------------|--------|----------------|---------------------------------------------|
+| `/api/v1/auth/register`        | POST   | ❌              | Create new account                          |
+| `/api/v1/auth/login`           | POST   | ❌              | Login + get tokens                          |
+| `/api/v1/auth/refresh`         | POST   | ❌              | Rotate tokens                               |
+| `/api/v1/auth/forgot-password` | POST   | ❌              | Request password reset email                |
+| `/api/v1/auth/reset-password`  | POST   | ❌              | Reset password with token                   |
+| `/api/v1/auth/me`              | GET    | ✅ Access token | Get current user                            |
+| `/api/v1/auth/password`        | PATCH  | ✅ Access token | Update password (requires current password) |
+| `/api/v1/auth/logout`          | POST   | ✅ Access token | Logout current session                      |
+| `/api/v1/auth/logout-all`      | POST   | ✅ Access token | Logout all sessions                         |
 
 ---
 

@@ -45,6 +45,7 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/reset-password").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout").authenticated()
                     .requestMatchers(HttpMethod.POST, "/api/v1/auth/logout-all").authenticated()
+                    .requestMatchers(HttpMethod.PATCH, "/api/v1/auth/password").authenticated()
                     .requestMatchers("/actuator/health").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/v1/jobs/**").permitAll()
 

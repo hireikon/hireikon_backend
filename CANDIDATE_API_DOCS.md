@@ -63,6 +63,7 @@ GET /api/v1/candidate/profile
     "resumeUrl": "https://arjnikafdfwrkqfgsnzf.supabase.co/storage/v1/object/public/resumes/user-uuid/resume.pdf",
     "linkedinUrl": "https://linkedin.com/in/rahimuddin",
     "summary": "Passionate backend developer with 2 years of experience.",
+    "totalApplications": 3,
     "skills": [...],
     "experiences": [...],
     "educations": [...]

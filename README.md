@@ -201,16 +201,17 @@ Pass `nextCursor` as `cursor` in the next request. When `hasMore` is `false`, yo
 
 ### Auth `/api/v1/auth`
 
-| Method | Endpoint           | Auth | Description                     |
-|--------|--------------------|------|---------------------------------|
-| POST   | `/register`        | ❌    | Register candidate or recruiter |
-| POST   | `/login`           | ❌    | Login and get tokens            |
-| POST   | `/refresh`         | ❌    | Rotate refresh token            |
-| POST   | `/forgot-password` | ❌    | Send password reset email       |
-| POST   | `/reset-password`  | ❌    | Reset password with token       |
-| GET    | `/me`              | ✅    | Get current user from JWT       |
-| POST   | `/logout`          | ✅    | Invalidate current session      |
-| POST   | `/logout-all`      | ✅    | Invalidate all sessions         |
+| Method | Endpoint           | Auth | Description                                 |
+|--------|--------------------|------|---------------------------------------------|
+| POST   | `/register`        | ❌    | Register candidate or recruiter             |
+| POST   | `/login`           | ❌    | Login and get tokens                        |
+| POST   | `/refresh`         | ❌    | Rotate refresh token                        |
+| POST   | `/forgot-password` | ❌    | Send password reset email                   |
+| POST   | `/reset-password`  | ❌    | Reset password with token                   |
+| GET    | `/me`              | ✅    | Get current user from JWT                   |
+| PATCH  | `/password`        | ✅    | Update password (requires current password) |
+| POST   | `/logout`          | ✅    | Invalidate current session                  |
+| POST   | `/logout-all`      | ✅    | Invalidate all sessions                     |
 
 **Token strategy:**
 

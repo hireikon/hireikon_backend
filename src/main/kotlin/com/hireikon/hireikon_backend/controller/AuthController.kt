@@ -6,6 +6,7 @@ import com.hireikon.hireikon_backend.dto.LoginRequest
 import com.hireikon.hireikon_backend.dto.RefreshTokenRequest
 import com.hireikon.hireikon_backend.dto.RegisterRequest
 import com.hireikon.hireikon_backend.dto.ResetPasswordRequest
+import com.hireikon.hireikon_backend.dto.UpdatePasswordRequest
 import com.hireikon.hireikon_backend.dto.UserSummary
 import com.hireikon.hireikon_backend.security.JwtService
 import com.hireikon.hireikon_backend.service.AuthService
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
@@ -59,7 +61,7 @@ class AuthController(
     fun refresh(
         @Valid @RequestBody request: RefreshTokenRequest
     ): ResponseEntity<ApiResponse<AuthResponse>> {
-        val response = authService.refresh(request)
+        val response = authService.refresh(request.refreshToken)
         return ResponseEntity.ok(ApiResponse.ok(
             response, "Token refreshed"
         ))
@@ -103,6 +105,19 @@ class AuthController(
             fullName = ""    // fetch from profile endpoint for full details
         )
         return ResponseEntity.ok(ApiResponse.ok(summary))
+    }
+
+    // PATCH /api/v1/auth/password
+    @PatchMapping("/password")
+    fun updatePassword(
+        @AuthenticationPrincipal userId: String,
+        @Valid @RequestBody request: UpdatePasswordRequest
+    ): ResponseEntity<ApiResponse<Nothing?>> {
+        authService.updatePassword(userId, request.currentPassword, request.newPassword)
+        return ResponseEntity.ok(ApiResponse.ok(
+            data = null,
+            message = "Password updated successfully. Please log in again."
+        ))
     }
 
     // POST /api/v1/auth/logout

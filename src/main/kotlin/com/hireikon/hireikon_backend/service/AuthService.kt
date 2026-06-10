@@ -47,7 +47,7 @@ class AuthService(
 
         if (request.role == UserRole.RECRUITER) {
             if (request.companyName.isNullOrBlank()) throw BadRequestException("Company name is required for recruiter accounts.")
-            if (request.position.isNullOrBlank())   throw BadRequestException("Position is required for recruiter accounts.")
+            if (request.position.isNullOrBlank()) throw BadRequestException("Position is required for recruiter accounts.")
         }
 
         // 1. Create base user
@@ -66,6 +66,7 @@ class AuthService(
                 candidateProfileRepository.save(profile)
                 request.fullName
             }
+
             UserRole.RECRUITER -> {
                 val recruiter = RecruiterEntity(
                     user = user,
@@ -76,6 +77,7 @@ class AuthService(
                 recruiterRepository.save(recruiter)
                 request.fullName
             }
+
             UserRole.ADMIN -> request.fullName
         }
 
@@ -96,8 +98,8 @@ class AuthService(
     }
 
     @Transactional
-    fun refresh(request: RefreshTokenRequest): AuthResponse {
-        val refreshToken = request.refreshToken
+    fun refresh(refreshToken: String): AuthResponse {
+        val refreshToken = refreshToken
 
         if (!jwtService.validateToken(refreshToken)) {
             throw UnauthorizedException("Invalid or expired refresh token.")
@@ -130,26 +132,45 @@ class AuthService(
         refreshTokenRepository.deleteByUserId(userId)
     }
 
-    private fun resolveFullName(user: UserEntity): String =
-        when (user.role) {
-            UserRole.CANDIDATE -> candidateProfileRepository
-                .findByUserId(user.id)
-                .map { it.fullName }
-                .orElse(user.email)
-            UserRole.RECRUITER -> recruiterRepository
-                .findByUserId(user.id)
-                .map { it.fullName }
-                .orElse(user.email)
-            UserRole.ADMIN -> "Admin"
+    @Transactional
+    fun updatePassword(userId: String, currentPassword: String, newPassword: String) {
+        val user = userRepository.findById(userId)
+            .orElseThrow { ResourceNotFoundException("User not found") }
+
+        if (!passwordEncoder.matches(currentPassword, user.passwordHash)) {
+            throw BadRequestException("Current password is incorrect")
         }
 
+        if (passwordEncoder.matches(newPassword, user.passwordHash)) {
+            throw BadRequestException("New password must be different from your current password")
+        }
+
+        user.passwordHash = passwordEncoder.encode(newPassword)
+        userRepository.save(user)
+        refreshTokenRepository.deleteByUserId(user.id)
+    }
+
+    private fun resolveFullName(user: UserEntity): String = when (user.role) {
+        UserRole.CANDIDATE -> candidateProfileRepository
+            .findByUserId(user.id)
+            .map { it.fullName }
+            .orElse(user.email)
+
+        UserRole.RECRUITER -> recruiterRepository
+            .findByUserId(user.id)
+            .map { it.fullName }
+            .orElse(user.email)
+
+        UserRole.ADMIN -> "Admin"
+    }
+
     private fun buildAuthResponseAndStoreRefreshToken(user: UserEntity, fullName: String): AuthResponse {
-        val accessToken  = jwtService.generateAccessToken(user.id, user.email, user.role)
+        val accessToken = jwtService.generateAccessToken(user.id, user.email, user.role)
         val refreshToken = jwtService.generateRefreshToken(user.id, user.email, user.role)
         storeRefreshToken(user.id, refreshToken)
 
         return AuthResponse(
-            accessToken  = accessToken,
+            accessToken = accessToken,
             refreshToken = refreshToken,
             user = UserSummary(
                 id = user.id,
