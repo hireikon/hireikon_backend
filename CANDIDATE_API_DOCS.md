@@ -56,6 +56,7 @@ GET /api/v1/candidate/profile
   "data": {
     "id": "profile-uuid",
     "userId": "user-uuid",
+    "email": "rahim@email.com",
     "fullName": "Rahim Uddin",
     "phone": "+8801712345678",
     "location": "Dhaka, Bangladesh",

@@ -30,6 +30,7 @@ data class UpdateProfileRequest(
 data class CandidateProfileResponse(
     val id: String,
     val userId: String,
+    val email: String,
     val fullName: String,
     val phone: String?,
     val location: String?,

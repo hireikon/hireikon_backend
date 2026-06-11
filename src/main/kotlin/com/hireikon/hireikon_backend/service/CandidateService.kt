@@ -291,6 +291,7 @@ class CandidateService(
     private fun CandidateProfileEntity.toResponse() = CandidateProfileResponse(
         id = id,
         userId = user.id,
+        email = user.email,
         fullName = fullName,
         phone = phone,
         location = location,
