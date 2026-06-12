@@ -588,6 +588,8 @@ Authorization: Bearer <recruiterAccessToken>
   "data": [
     {
       "applicationId": "application-uuid",
+      "jobId": "job-uuid",
+      "jobTitle": "Senior Backend Developer",
       "candidateId": "profile-uuid",
       "candidateName": "Rahim Uddin",
       "candidateEmail": "rahim@example.com",
@@ -598,7 +600,6 @@ Authorization: Bearer <recruiterAccessToken>
       "matchScore": 75,
       "status": "PENDING",
       "appliedAt": "2026-05-01T10:00:00",
-      "position": it will be added later,
       "skills": [...]
     }
   ],

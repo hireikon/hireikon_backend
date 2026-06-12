@@ -190,7 +190,6 @@ class ApplicationService(
         candidateName = candidate.fullName,
         candidateEmail = candidate.user.email,
         avatarUrl = candidate.avatarUrl,
-
         resumeUrl = candidate.resumeUrl,
         linkedinUrl = candidate.linkedinUrl,
         githubUrl = candidate.githubUrl,
