@@ -23,8 +23,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableMethodSecurity(prePostEnabled = true)
 class SecurityConfig(
     private val jwtAuthFilter: JwtAuthFilter,
-    @Value("\${app.cors.allowed-origins:http://localhost:3000,http://localhost:3001}")
-    private val allowedOriginsRaw: String
+    @Value("\${app.cors.allowed-origins:http}") private val allowedOriginsRaw: String
 ) {
     private val allowedOrigins: List<String>
         get() = allowedOriginsRaw.split(",").map { it.trim() }

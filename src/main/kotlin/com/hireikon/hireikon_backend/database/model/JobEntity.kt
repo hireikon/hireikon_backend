@@ -1,6 +1,9 @@
 package com.hireikon.hireikon_backend.database.model
 
 import com.hireikon.hireikon_backend.database.model.enums.JobStatus
+import com.hireikon.hireikon_backend.database.model.enums.JobType
+import com.hireikon.hireikon_backend.database.model.enums.SalaryPeriod
+import com.hireikon.hireikon_backend.database.model.enums.WorkMode
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -42,6 +45,27 @@ class JobEntity(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var status: JobStatus = JobStatus.DRAFT,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "job_type", nullable = false)
+    var jobType: JobType = JobType.FULL_TIME,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "work_mode", nullable = false)
+    var workMode: WorkMode = WorkMode.ON_SITE,
+
+    @Column(name = "salary_min")
+    var salaryMin: Long? = null,
+
+    @Column(name = "salary_Max")
+    var salaryMax: Long? = null,
+
+    @Column(name = "salary_currency", length = 10)
+    var salaryCurrency: String? = null,  // e.g. "BDT", "USD"
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "salary_period")
+    var salaryPeriod: SalaryPeriod? = null,
 
     @Column(name = "posted_at")
     var postedAt: LocalDateTime? = null,

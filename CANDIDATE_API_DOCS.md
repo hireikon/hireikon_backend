@@ -201,9 +201,9 @@ Content-Type: multipart/form-data
 
 **Form Data:**
 
-| Key | Type | Required | Constraints |
-|---|---|---|---|
-| `file` | File | ✅ | JPEG, PNG or WebP. Max 5MB |
+| Key    | Type | Required | Constraints                |
+|--------|------|----------|----------------------------|
+| `file` | File | ✅        | JPEG, PNG or WebP. Max 5MB |
 
 **Compression details:**
 - Resized to max 400×400 (aspect ratio preserved)

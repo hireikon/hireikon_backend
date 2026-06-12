@@ -2,17 +2,21 @@ package com.hireikon.hireikon_backend.service
 
 import com.hireikon.hireikon_backend.ai.SkillGapAnalyzer
 import com.hireikon.hireikon_backend.database.model.ApplicationEntity
+import com.hireikon.hireikon_backend.database.model.CandidateSkillEntity
 import com.hireikon.hireikon_backend.database.model.SkillGapReportEntity
 import com.hireikon.hireikon_backend.database.model.enums.ApplicationStatus
 import com.hireikon.hireikon_backend.database.model.enums.JobStatus
 import com.hireikon.hireikon_backend.database.repository.ApplicationRepository
 import com.hireikon.hireikon_backend.database.repository.CandidateProfileRepository
+import com.hireikon.hireikon_backend.database.repository.CandidateSkillRepository
 import com.hireikon.hireikon_backend.database.repository.JobRequiredSkillRepository
 import com.hireikon.hireikon_backend.database.repository.SkillGapReportRepository
 import com.hireikon.hireikon_backend.dto.ApplicantResponse
 import com.hireikon.hireikon_backend.dto.ApplicationResponse
+import com.hireikon.hireikon_backend.dto.CandidateSkillResponse
 import com.hireikon.hireikon_backend.dto.JobSummaryResponse
 import com.hireikon.hireikon_backend.dto.MyApplicationResponse
+import com.hireikon.hireikon_backend.dto.SalaryResponse
 import com.hireikon.hireikon_backend.dto.UpdateApplicationStatusRequest
 import com.hireikon.hireikon_backend.shared.BadRequestException
 import com.hireikon.hireikon_backend.shared.CursorPage
@@ -28,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional
 class ApplicationService(
     private val applicationRepository: ApplicationRepository,
     private val candidateProfileRepository: CandidateProfileRepository,
+    private val candidateSkillRepository: CandidateSkillRepository,
     private val skillGapReportRepository: SkillGapReportRepository,
     private val jobRequiredSkillRepository: JobRequiredSkillRepository,
     private val jobService: JobService,
@@ -160,6 +165,14 @@ class ApplicationService(
             company = job.company,
             location = job.location,
             status = job.status,
+            jobType = job.jobType,
+            workMode = job.workMode,
+            salary = SalaryResponse(
+                min = job.salaryMin,
+                max = job.salaryMax,
+                period = job.salaryPeriod,
+                currency = job.salaryCurrency
+            ),
             postedAt = job.postedAt,
             deadline = job.deadline,
             requiredSkillCount = jobRequiredSkillRepository.findByJobId(job.id).size
@@ -174,11 +187,21 @@ class ApplicationService(
         candidateId = candidate.id,
         candidateName = candidate.fullName,
         candidateEmail = candidate.user.email,
+        avatarUrl = candidate.avatarUrl,
         resumeUrl = candidate.resumeUrl,
         linkedinUrl = candidate.linkedinUrl,
         githubUrl = candidate.githubUrl,
         matchScore = matchScore,
         status = status,
-        appliedAt = appliedAt
+        appliedAt = appliedAt,
+        skills = candidateSkillRepository.findByCandidateId(id).map { it.toResponse() }
+    )
+
+    private fun CandidateSkillEntity.toResponse() = CandidateSkillResponse(
+        id = id,
+        skillId = skill.id,
+        skillName = skill.name,
+        category = skill.category,
+        proficiencyLevel = proficiencyLevel
     )
 }

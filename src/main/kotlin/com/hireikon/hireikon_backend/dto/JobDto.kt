@@ -1,7 +1,10 @@
 package com.hireikon.hireikon_backend.dto
 
 import com.hireikon.hireikon_backend.database.model.enums.JobStatus
+import com.hireikon.hireikon_backend.database.model.enums.JobType
 import com.hireikon.hireikon_backend.database.model.enums.ProficiencyLevel
+import com.hireikon.hireikon_backend.database.model.enums.SalaryPeriod
+import com.hireikon.hireikon_backend.database.model.enums.WorkMode
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
@@ -23,6 +26,13 @@ data class CreateJobRequest(
     val description: String,
 
     val deadline: LocalDateTime? = null,
+    val jobType: JobType = JobType.FULL_TIME,
+    val workMode: WorkMode = WorkMode.ON_SITE,
+    val salaryMin: Long? = null,
+    val salaryMax: Long? = null,
+    @field:Size(max = 10, message = "Currency code must be at most 10 characters")
+    val salaryCurrency: String? = null,
+    val salaryPeriod: SalaryPeriod? = null,
 
     @field:NotEmpty(message = "At least one required skill must be specified")
     val requiredSkills: List<JobSkillRequest>
@@ -45,6 +55,13 @@ data class UpdateJobRequest(
 
     val status: JobStatus = JobStatus.OPEN,
     val deadline: LocalDateTime? = null,
+    val jobType: JobType = JobType.FULL_TIME,
+    val workMode: WorkMode = WorkMode.ON_SITE,
+    val salaryMin: Long? = null,
+    val salaryMax: Long? = null,
+    @field:Size(max = 10, message = "Currency code must be at most 10 characters")
+    val salaryCurrency: String? = null,
+    val salaryPeriod: SalaryPeriod? = null,
 
     @field:NotEmpty(message = "At least one required skill must be specified")
     val requiredSkills: List<JobSkillRequest>
@@ -65,9 +82,19 @@ data class JobResponse(
     val location: String?,
     val description: String,
     val status: JobStatus,
+    val jobType: JobType,
+    val workMode: WorkMode,
+    val salary: SalaryResponse,
     val postedAt: LocalDateTime?,
     val deadline: LocalDateTime?,
     val requiredSkills: List<JobSkillResponse>
+)
+
+data class SalaryResponse(
+    val min: Long?,
+    val max: Long?,
+    val currency: String?,
+    val period: SalaryPeriod?
 )
 
 data class JobSkillResponse(
@@ -83,6 +110,9 @@ data class JobSummaryResponse(
     val company: String,
     val location: String?,
     val status: JobStatus,
+    val jobType: JobType,
+    val workMode: WorkMode,
+    val salary: SalaryResponse,
     val postedAt: LocalDateTime?,
     val deadline: LocalDateTime?,
     val requiredSkillCount: Int

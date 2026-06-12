@@ -22,12 +22,14 @@ data class ApplicantResponse(
     val candidateId: String,
     val candidateName: String,
     val candidateEmail: String,
+    val avatarUrl: String?,
     val resumeUrl: String?,
     val linkedinUrl: String?,
     val githubUrl: String?,
     val matchScore: Int?,
     val status: ApplicationStatus,
-    val appliedAt: LocalDateTime
+    val appliedAt: LocalDateTime,
+    val skills: List<CandidateSkillResponse>
 )
 
 // Recruiter updates application status

@@ -4,7 +4,9 @@ import com.hireikon.hireikon_backend.database.model.JobEntity
 import com.hireikon.hireikon_backend.database.model.JobRequiredSkillEntity
 import com.hireikon.hireikon_backend.database.model.SkillEntity
 import com.hireikon.hireikon_backend.database.model.enums.JobStatus
+import com.hireikon.hireikon_backend.database.model.enums.JobType
 import com.hireikon.hireikon_backend.database.model.enums.SkillCategory
+import com.hireikon.hireikon_backend.database.model.enums.WorkMode
 import com.hireikon.hireikon_backend.database.repository.JobRepository
 import com.hireikon.hireikon_backend.database.repository.JobRequiredSkillRepository
 import com.hireikon.hireikon_backend.database.repository.RecruiterRepository
@@ -14,6 +16,7 @@ import com.hireikon.hireikon_backend.dto.JobResponse
 import com.hireikon.hireikon_backend.dto.JobSkillRequest
 import com.hireikon.hireikon_backend.dto.JobSkillResponse
 import com.hireikon.hireikon_backend.dto.JobSummaryResponse
+import com.hireikon.hireikon_backend.dto.SalaryResponse
 import com.hireikon.hireikon_backend.dto.UpdateJobRequest
 import com.hireikon.hireikon_backend.shared.CursorPage
 import com.hireikon.hireikon_backend.shared.CursorRequest
@@ -35,10 +38,12 @@ class JobService(
     fun getOpenJobs(
         keyword: String? = null,
         location: String? = null,
+        jobType: JobType? = null,
+        workMode: WorkMode? = null,
         cursorRequest: CursorRequest = CursorRequest()
     ): CursorPage<JobSummaryResponse> {
         val size = cursorRequest.validatedPageSize
-        val items = jobRepository.searchJobsCursor(location, keyword, cursorRequest.cursor, size + 1)
+        val items = jobRepository.searchJobsCursor(location, keyword, jobType, workMode, cursorRequest.cursor, size + 1)
         return items.toCursorPage(
             pageSize = size,
             idExtractor = { it.id },
@@ -64,6 +69,12 @@ class JobService(
                 location = request.location,
                 description = request.description,
                 status = JobStatus.OPEN,
+                jobType = request.jobType,
+                workMode = request.workMode,
+                salaryMin = request.salaryMin,
+                salaryMax = request.salaryMax,
+                salaryCurrency = request.salaryCurrency,
+                salaryPeriod = request.salaryPeriod,
                 postedAt = LocalDateTime.now(),
                 deadline = request.deadline
             )
@@ -82,6 +93,12 @@ class JobService(
         job.location = request.location
         job.description = request.description
         job.status = request.status
+        job.jobType = request.jobType
+        job.workMode = request.workMode
+        job.salaryMin = request.salaryMin
+        job.salaryMax = request.salaryMax
+        job.salaryCurrency = request.salaryCurrency
+        job.salaryPeriod = request.salaryPeriod
         job.deadline = request.deadline
 
         jobRequiredSkillRepository.deleteByJobId(job.id)
@@ -158,6 +175,14 @@ class JobService(
         location = location,
         description = description,
         status = status,
+        jobType = jobType,
+        workMode = workMode,
+        salary = SalaryResponse(
+            min = salaryMin,
+            max = salaryMax,
+            period = salaryPeriod,
+            currency = salaryCurrency
+        ),
         postedAt = postedAt,
         deadline = deadline,
         requiredSkills = jobRequiredSkillRepository.findByJobId(id).map { it.toSkillResponse() }
@@ -169,6 +194,14 @@ class JobService(
         company = company,
         location = location,
         status = status,
+        jobType = jobType,
+        workMode = workMode,
+        salary = SalaryResponse(
+            min = salaryMin,
+            max = salaryMax,
+            period = salaryPeriod,
+            currency = salaryCurrency
+        ),
         postedAt = postedAt,
         deadline = deadline,
         requiredSkillCount = jobRequiredSkillRepository.findByJobId(id).size

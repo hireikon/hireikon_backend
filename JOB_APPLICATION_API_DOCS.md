@@ -37,7 +37,9 @@ Browse all open jobs. Supports optional keyword and location filtering.
 GET /api/v1/jobs
 GET /api/v1/jobs?keyword=backend
 GET /api/v1/jobs?location=dhaka
-GET /api/v1/jobs?keyword=kotlin&location=dhaka&cursor={cursor}&pageSize={pageSize}
+GET /api/v1/jobs?jobType=FULL_TIME
+GET /api/v1/jobs?workMode=ON_SITE
+GET /api/v1/jobs?keyword=kotlin&location=dhaka&jobType=FULL_TIME&workMode=ON_SITE&cursor={cursor}&pageSize={pageSize}
 ```
 
 **Query Parameters:**
@@ -46,10 +48,13 @@ GET /api/v1/jobs?keyword=kotlin&location=dhaka&cursor={cursor}&pageSize={pageSiz
 |------------|---------------|----------|---------------------------------------------------------|
 | `keyword`  | string        | ❌        | Filters by job title (case-insensitive)                 |
 | `location` | string        | ❌        | Filters by location (case-insensitive)                  |
+| `jobType`  | string        | ❌        | Filters by location (case-insensitive)                  |
+| `workMode` | string        | ❌        | Filters by location (case-insensitive)                  |
 | `cursor`   | string (UUID) | ❌        | ID of last item from previous page. Omit for first page |
 | `pageSize` | integer       | ❌        | Items per page. Min 1, max 100. Default 20              |
 
 **Success Response — `200 OK`:**
+
 ```json
 {
   "success": true,
@@ -61,6 +66,14 @@ GET /api/v1/jobs?keyword=kotlin&location=dhaka&cursor={cursor}&pageSize={pageSiz
       "company": "TechCorp BD",
       "location": "Dhaka, Bangladesh",
       "status": "OPEN",
+      "jobType": "FULL_TIME",
+      "workMode": "ON_SITE",
+      "salary": {
+        "min": 100,
+        "max": 500,
+        "type": "HOURLY",
+        "currency": "BDT"
+      },
       "postedAt": "2026-05-01T10:00:00",
       "deadline": "2026-12-31T23:59:59",
       "requiredSkillCount": 4
@@ -93,6 +106,14 @@ GET /api/v1/jobs/{id}
     "location": "Dhaka, Bangladesh",
     "description": "We are looking for a skilled backend developer...",
     "status": "OPEN",
+    "jobType": "FULL_TIME",
+    "workMode": "ON_SITE",
+    "salary": {
+      "min": 100,
+      "max": 500,
+      "type": "HOURLY",
+      "currency": "BDT"
+    },
     "postedAt": "2026-05-01T10:00:00",
     "deadline": "2026-12-31T23:59:59",
     "requiredSkills": [
@@ -143,6 +164,14 @@ Authorization: Bearer <recruiterAccessToken>
       "company": "TechCorp BD",
       "location": "Dhaka, Bangladesh",
       "status": "OPEN",
+      "jobType": "FULL_TIME",
+      "workMode": "ON_SITE",
+      "salary": {
+        "min": 100,
+        "max": 500,
+        "type": "HOURLY",
+        "currency": "BDT"
+      },
       "postedAt": "2026-05-01T10:00:00",
       "deadline": "2026-12-31T23:59:59",
       "requiredSkillCount": 5
@@ -166,14 +195,29 @@ Content-Type: application/json
 
 **Request Body:**
 
-| Field            | Type     | Required | Constraints               |
-|------------------|----------|----------|---------------------------|
-| `title`          | string   | ✅        | Max 150 chars             |
-| `company`        | string   | ✅        | Max 100 chars             |
-| `location`       | string   | ❌        | Max 100 chars             |
-| `description`    | string   | ✅        | No limit                  |
-| `deadline`       | datetime | ❌        | `YYYY-MM-DDTHH:MM:SS`     |
-| `requiredSkills` | array    | ✅        | At least 1 skill required |
+| Field            | Type     | Required | Constraints                        |
+|------------------|----------|----------|------------------------------------|
+| `title`          | string   | ✅        | Max 150 chars                      |
+| `company`        | string   | ✅        | Max 100 chars                      |
+| `location`       | string   | ❌        | Max 100 chars                      |
+| `description`    | string   | ✅        | No limit                           |
+| `deadline`       | datetime | ❌        | `YYYY-MM-DDTHH:MM:SS`              |
+| `jobType`        | enum     | ✅        | At least 1 type required           |
+| `workMode`       | enum     | ✅        | At least 1 type required           |
+| `salaryMin`      | Long     | ❌        | No limit                           |
+| `salaryMax`      | Long     | ❌        | No limit                           |
+| `salaryCurrency` | string   | ❌        | Max 10 chars                       |
+| `salaryType`     | enum     | ❌        |                                    |
+| `requiredSkills` | array    | ✅        | At least 1 skill required          |
+
+**`jobType` item fields:**
+`FULL_TIME`, `PART_TIME`, `CONTRACT`, `INTERNSHIP`, `FREELANCE`, `REMOTE`. Defaults to `FULL_TIME`
+
+**`workMode` item fields:**
+`ON_SITE`, `REMOTE`, `HYBRID`. Defaults to `ON_SITE`
+
+**`salaryType` item fields:**
+`MONTHLY`, `YEARLY`, `HOURLY`.
 
 **`requiredSkills` item fields:**
 
@@ -184,6 +228,7 @@ Content-Type: application/json
 | `isMandatory`   | boolean | ❌        | Defaults to `true`. Affects match score weighting                         |
 
 **Example:**
+
 ```json
 {
   "title": "Backend Developer",
@@ -191,11 +236,33 @@ Content-Type: application/json
   "location": "Dhaka, Bangladesh",
   "description": "We are looking for a skilled backend developer with experience in Kotlin and Spring Boot.",
   "deadline": "2026-12-31T23:59:59",
+  "jobType": "FULL_TIME",
+  "workMode": "ON_SITE",
+  "salaryMin": 100,
+  "salaryMax": 500,
+  "salaryCurrency": "BDT",
+  "salaryType": "HOURLY",
   "requiredSkills": [
-    { "skillName": "Kotlin",      "levelRequired": "ADVANCED",    "isMandatory": true  },
-    { "skillName": "Spring Boot", "levelRequired": "INTERMEDIATE", "isMandatory": true  },
-    { "skillName": "PostgreSQL",  "levelRequired": "INTERMEDIATE", "isMandatory": true  },
-    { "skillName": "Docker",      "levelRequired": "BEGINNER",     "isMandatory": false }
+    {
+      "skillName": "Kotlin",
+      "levelRequired": "ADVANCED",
+      "isMandatory": true
+    },
+    {
+      "skillName": "Spring Boot",
+      "levelRequired": "INTERMEDIATE",
+      "isMandatory": true
+    },
+    {
+      "skillName": "PostgreSQL",
+      "levelRequired": "INTERMEDIATE",
+      "isMandatory": true
+    },
+    {
+      "skillName": "Docker",
+      "levelRequired": "BEGINNER",
+      "isMandatory": false
+    }
   ]
 }
 ```
@@ -213,6 +280,14 @@ Content-Type: application/json
     "location": "Dhaka, Bangladesh",
     "description": "We are looking for...",
     "status": "OPEN",
+    "jobType": "FULL_TIME",
+    "workMode": "ON_SITE",
+    "salary": {
+      "min": 100,
+      "max": 500,
+      "type": "HOURLY",
+      "currency": "BDT"
+    },
     "postedAt": "2026-05-01T10:00:00",
     "deadline": "2026-12-31T23:59:59",
     "requiredSkills": [...]
@@ -420,6 +495,14 @@ Authorization: Bearer <candidateAccessToken>
         "company": "TechCorp BD",
         "location": "Dhaka, Bangladesh",
         "status": "OPEN",
+        "jobType": "FULL_TIME",
+        "workMode": "ON_SITE",
+        "salary": {
+          "min": 100,
+          "max": 500,
+          "type": "HOURLY",
+          "currency": "BDT"
+        },
         "postedAt": "2026-05-01T10:00:00",
         "deadline": "2026-12-31T23:59:59",
         "requiredSkillCount": 5
@@ -508,12 +591,15 @@ Authorization: Bearer <recruiterAccessToken>
       "candidateId": "profile-uuid",
       "candidateName": "Rahim Uddin",
       "candidateEmail": "rahim@example.com",
+      "avatarUrl": "https://xyz.supabase.co/.../profile_avatars/candidate/user-uuid.jpg",
       "resumeUrl": "https://...supabase.co/.../resume.pdf",
       "linkedinUrl": "https://linkedin.com/in/rahimuddin",
       "githubUrl": "https://github.com/rahimuddin",
       "matchScore": 75,
       "status": "PENDING",
-      "appliedAt": "2026-05-01T10:00:00"
+      "appliedAt": "2026-05-01T10:00:00",
+      "position": it will be added later,
+      "skills": [...]
     }
   ],
   "errors": null

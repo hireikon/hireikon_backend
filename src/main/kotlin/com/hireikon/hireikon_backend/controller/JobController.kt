@@ -1,6 +1,8 @@
 package com.hireikon.hireikon_backend.controller
 
 import com.hireikon.hireikon_backend.database.model.enums.JobStatus
+import com.hireikon.hireikon_backend.database.model.enums.JobType
+import com.hireikon.hireikon_backend.database.model.enums.WorkMode
 import com.hireikon.hireikon_backend.dto.CreateJobRequest
 import com.hireikon.hireikon_backend.dto.JobResponse
 import com.hireikon.hireikon_backend.dto.JobSummaryResponse
@@ -30,16 +32,18 @@ class JobController(
     private val jobService: JobService
 ) {
 
-    // GET /api/v1/jobs?keyword=kotlin&location=dhaka&cursor=uuid&pageSize=20
+    // GET /api/v1/jobs?keyword=kotlin&location=dhaka&jobType=FULL_TIME&workMode=ON_SITE&cursor=uuid&pageSize=20
     @GetMapping
     fun getOpenJobs(
         @RequestParam(required = false) keyword: String?,
         @RequestParam(required = false) location: String?,
+        @RequestParam(required = false) jobType: JobType?,
+        @RequestParam(required = false) workMode: WorkMode?,
         @RequestParam(required = false) cursor: String?,
         @RequestParam(defaultValue = "20") pageSize: Int
     ): ResponseEntity<ApiResponse<CursorPage<JobSummaryResponse>>> =
         ResponseEntity.ok(ApiResponse.ok(
-            jobService.getOpenJobs(keyword, location, CursorRequest(cursor, pageSize))
+            jobService.getOpenJobs(keyword, location, jobType, workMode, CursorRequest(cursor, pageSize))
         ))
 
     // GET /api/v1/jobs/{id}
