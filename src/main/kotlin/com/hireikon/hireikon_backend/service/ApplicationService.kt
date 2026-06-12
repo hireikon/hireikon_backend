@@ -184,10 +184,13 @@ class ApplicationService(
 
     private fun ApplicationEntity.toApplicantResponse() = ApplicantResponse(
         applicationId = id,
+        jobId = job.id,
+        jobTitle = job.title,
         candidateId = candidate.id,
         candidateName = candidate.fullName,
         candidateEmail = candidate.user.email,
         avatarUrl = candidate.avatarUrl,
+
         resumeUrl = candidate.resumeUrl,
         linkedinUrl = candidate.linkedinUrl,
         githubUrl = candidate.githubUrl,

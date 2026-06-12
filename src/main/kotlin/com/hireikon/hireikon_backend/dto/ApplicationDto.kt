@@ -19,6 +19,8 @@ data class ApplicationResponse(
 // Recruiter dashboard — full applicant detail per application
 data class ApplicantResponse(
     val applicationId: String,
+    val jobId: String,
+    val jobTitle: String,
     val candidateId: String,
     val candidateName: String,
     val candidateEmail: String,
