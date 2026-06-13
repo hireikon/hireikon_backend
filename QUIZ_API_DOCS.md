@@ -49,7 +49,7 @@ Generate Quiz ──► Get Quiz (questions only)
 
 ### 1. Generate Quiz
 
-Calls Gemini AI to generate multiple-choice questions for a skill at a given difficulty level. The skill must already exist in the database — add it to your profile first via `POST /api/v1/candidate/skills`.
+Calls Gemini AI to generate multiple-choice questions for a skill at a given difficulty level.
 
 ```
 POST /api/v1/quiz/generate

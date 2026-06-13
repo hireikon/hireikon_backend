@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.hireikon.hireikon_backend.ai.QuizGenerator
 import com.hireikon.hireikon_backend.database.model.CandidateProfileEntity
 import com.hireikon.hireikon_backend.database.model.QuizEntity
+import com.hireikon.hireikon_backend.database.model.SkillEntity
 import com.hireikon.hireikon_backend.database.model.enums.ProficiencyLevel
+import com.hireikon.hireikon_backend.database.model.enums.SkillCategory
 import com.hireikon.hireikon_backend.database.repository.CandidateProfileRepository
 import com.hireikon.hireikon_backend.database.repository.QuizRepository
 import com.hireikon.hireikon_backend.database.repository.SkillRepository
@@ -42,8 +44,13 @@ class QuizService(
         }
 
         val profile = findProfile(userId)
-        val skill = skillRepository.findByNameIgnoreCase(request.skillName)
-            .orElseThrow { ResourceNotFoundException("Skill '${request.skillName}' not found. Add it to your profile first.") }
+
+        val skill = skillRepository.findByNameIgnoreCase(request.skillName).orElseGet {
+            skillRepository.save(SkillEntity(
+                name = request.skillName,
+                category = SkillCategory.OTHER
+            ))
+        }
 
         // Generate questions via Gemini
         val generated = quizGenerator.generate(skill.name, request.proficiencyLevel, request.questionCount)
