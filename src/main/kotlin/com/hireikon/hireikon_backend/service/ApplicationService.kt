@@ -9,11 +9,17 @@ import com.hireikon.hireikon_backend.database.model.enums.JobStatus
 import com.hireikon.hireikon_backend.database.repository.ApplicationRepository
 import com.hireikon.hireikon_backend.database.repository.CandidateProfileRepository
 import com.hireikon.hireikon_backend.database.repository.CandidateSkillRepository
+import com.hireikon.hireikon_backend.database.repository.EducationRepository
+import com.hireikon.hireikon_backend.database.repository.ExperienceRepository
 import com.hireikon.hireikon_backend.database.repository.JobRequiredSkillRepository
 import com.hireikon.hireikon_backend.database.repository.SkillGapReportRepository
 import com.hireikon.hireikon_backend.dto.ApplicantResponse
 import com.hireikon.hireikon_backend.dto.ApplicationResponse
+import com.hireikon.hireikon_backend.dto.CandidateDetailResponse
+import com.hireikon.hireikon_backend.dto.CandidateProfileResponse
 import com.hireikon.hireikon_backend.dto.CandidateSkillResponse
+import com.hireikon.hireikon_backend.dto.EducationResponse
+import com.hireikon.hireikon_backend.dto.ExperienceResponse
 import com.hireikon.hireikon_backend.dto.JobSummaryResponse
 import com.hireikon.hireikon_backend.dto.MyApplicationResponse
 import com.hireikon.hireikon_backend.dto.SalaryResponse
@@ -35,6 +41,8 @@ class ApplicationService(
     private val candidateSkillRepository: CandidateSkillRepository,
     private val skillGapReportRepository: SkillGapReportRepository,
     private val jobRequiredSkillRepository: JobRequiredSkillRepository,
+    private val experienceRepository: ExperienceRepository,
+    private val educationRepository: EducationRepository,
     private val jobService: JobService,
     private val skillGapAnalyzer: SkillGapAnalyzer
 ) {
@@ -124,6 +132,61 @@ class ApplicationService(
             pageSize = size,
             idExtractor = { it.id },
             mapper = { it.toApplicantResponse() }
+        )
+    }
+
+    @Transactional(readOnly = true)
+    fun getCandidateDetail(userId: String, applicationId: String): CandidateDetailResponse {
+        val application = findApplication(applicationId)
+        val recruiter = application.job.recruiter
+        if (recruiter.user.id != userId) throw UnauthorizedException()
+
+        val candidate = application.candidate
+
+        val profileResponse = CandidateProfileResponse(
+            id = candidate.id,
+            userId = candidate.user.id,
+            email = candidate.user.email,
+            fullName = candidate.fullName,
+            phone = candidate.phone,
+            location = candidate.location,
+            avatarUrl = candidate.avatarUrl,
+            resumeUrl = candidate.resumeUrl,
+            linkedinUrl = candidate.linkedinUrl,
+            githubUrl = candidate.githubUrl,
+            summary = candidate.summary,
+            totalApplications = applicationRepository.countByCandidateId(candidate.id),
+            skills = candidateSkillRepository.findByCandidateId(candidate.id).map { it.toResponse() },
+            experiences = experienceRepository.findByCandidateIdOrderByStartDateDesc(candidate.id).map {
+                ExperienceResponse(
+                    id = it.id,
+                    company = it.company,
+                    title = it.title,
+                    startDate = it.startDate,
+                    endDate = it.endDate,
+                    isCurrent = it.endDate == null,
+                    description = it.description
+                )
+            },
+            educations = educationRepository.findByCandidateIdOrderByGraduationDateDesc(candidate.id).map {
+                EducationResponse(
+                    id = it.id,
+                    institution = it.institution,
+                    degree = it.degree,
+                    field = it.field,
+                    graduationDate = it.graduationDate
+                )
+            }
+        )
+
+        return CandidateDetailResponse(
+            applicationId = application.id,
+            jobId = application.job.id,
+            jobTitle = application.job.title,
+            matchScore = application.matchScore,
+            status = application.status,
+            appliedAt = application.appliedAt,
+            profile = profileResponse
         )
     }
 

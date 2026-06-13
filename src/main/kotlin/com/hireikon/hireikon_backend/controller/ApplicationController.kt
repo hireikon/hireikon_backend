@@ -3,6 +3,7 @@ package com.hireikon.hireikon_backend.controller
 import com.hireikon.hireikon_backend.database.model.enums.ApplicationStatus
 import com.hireikon.hireikon_backend.dto.ApplicantResponse
 import com.hireikon.hireikon_backend.dto.ApplicationResponse
+import com.hireikon.hireikon_backend.dto.CandidateDetailResponse
 import com.hireikon.hireikon_backend.dto.MyApplicationResponse
 import com.hireikon.hireikon_backend.dto.UpdateApplicationStatusRequest
 import com.hireikon.hireikon_backend.service.ApplicationService
@@ -35,8 +36,8 @@ class ApplicationController(
     ): ResponseEntity<ApiResponse<ApplicationResponse>> =
         ResponseEntity.status(HttpStatus.CREATED).body(
             ApiResponse.created(
-                applicationService.apply(currentUserId(), jobId),
-                "Application submitted successfully"
+                data = applicationService.apply(currentUserId(), jobId),
+                message = "Application submitted successfully"
             )
         )
 
@@ -47,7 +48,7 @@ class ApplicationController(
         @RequestParam(defaultValue = "20") pageSize: Int
     ): ResponseEntity<ApiResponse<CursorPage<MyApplicationResponse>>> =
         ResponseEntity.ok(ApiResponse.ok(
-            applicationService.getMyApplications(currentUserId(), CursorRequest(cursor, pageSize))
+            data = applicationService.getMyApplications(currentUserId(), CursorRequest(cursor, pageSize))
         ))
 
     // GET /api/v1/applications/{id}
@@ -56,7 +57,7 @@ class ApplicationController(
         @PathVariable id: String
     ): ResponseEntity<ApiResponse<ApplicationResponse>> =
         ResponseEntity.ok(ApiResponse.ok(
-            applicationService.getApplicationById(currentUserId(), id)
+            data = applicationService.getApplicationById(currentUserId(), id)
         ))
 
     // GET /api/v1/applications/job/{jobId}?status=SHORTLISTED&cursor=uuid&pageSize=20
@@ -68,7 +69,16 @@ class ApplicationController(
         @RequestParam(defaultValue = "20") pageSize: Int
     ): ResponseEntity<ApiResponse<CursorPage<ApplicantResponse>>> =
         ResponseEntity.ok(ApiResponse.ok(
-            applicationService.getApplicants(currentUserId(), jobId, status, CursorRequest(cursor, pageSize))
+            data = applicationService.getApplicants(currentUserId(), jobId, status, CursorRequest(cursor, pageSize))
+        ))
+
+    // GET /api/v1/applications/{applicationId}/candidate
+    @GetMapping("/{applicationId}/candidate")
+    fun getCandidateDetail(
+        @PathVariable applicationId: String
+    ): ResponseEntity<ApiResponse<CandidateDetailResponse>> =
+        ResponseEntity.ok(ApiResponse.ok(
+            data = applicationService.getCandidateDetail(currentUserId(), applicationId)
         ))
 
     // PATCH /api/v1/applications/{id}/status
@@ -78,8 +88,8 @@ class ApplicationController(
         @Valid @RequestBody request: UpdateApplicationStatusRequest
     ): ResponseEntity<ApiResponse<ApplicationResponse>> =
         ResponseEntity.ok(ApiResponse.ok(
-            applicationService.updateApplicationStatus(currentUserId(), id, request),
-            "Application status updated"
+            data = applicationService.updateApplicationStatus(currentUserId(), id, request),
+            message = "Application status updated"
         ))
 
     private fun currentUserId(): String =

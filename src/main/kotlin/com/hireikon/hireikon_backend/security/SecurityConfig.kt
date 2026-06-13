@@ -53,6 +53,7 @@ class SecurityConfig(
 
                     // Recruiter only
                     .requestMatchers(HttpMethod.GET, "/api/v1/applications/job/**").hasRole("RECRUITER")
+                    .requestMatchers(HttpMethod.GET, "/api/v1/applications/*/candidate").hasRole("RECRUITER")
                     .requestMatchers(HttpMethod.PATCH, "/api/v1/applications/*/status").hasRole("RECRUITER")
                     .requestMatchers(HttpMethod.GET, "/api/v1/jobs/my").hasRole("RECRUITER")
                     .requestMatchers(HttpMethod.POST, "/api/v1/jobs").hasRole("RECRUITER")

@@ -10,20 +10,21 @@ The Job & Application API handles job posting by recruiters, job browsing by can
 
 ## Role Access Summary
 
-| Route                       | Method | Who                      |
-|-----------------------------|--------|--------------------------|
-| `/jobs`                     | GET    | Public (no token)        |
-| `/jobs/{id}`                | GET    | Public (no token)        |
-| `/jobs`                     | POST   | `RECRUITER` only         |
-| `/jobs/my`                  | GET    | `RECRUITER` only         |
-| `/jobs/{id}`                | PUT    | `RECRUITER` only (owner) |
-| `/jobs/{id}/status`         | PATCH  | `RECRUITER` only (owner) |
-| `/jobs/{id}`                | DELETE | `RECRUITER` only (owner) |
-| `/applications/{jobId}`     | POST   | `CANDIDATE` only         |
-| `/applications/my`          | GET    | `CANDIDATE` only         |
-| `/applications/{id}`        | GET    | `CANDIDATE` only (owner) |
-| `/applications/job/{jobId}` | GET    | `RECRUITER` only (owner) |
-| `/applications/{id}/status` | PATCH  | `RECRUITER` only (owner) |
+| Route                                     | Method | Who                      |
+|-------------------------------------------|--------|--------------------------|
+| `/jobs`                                   | GET    | Public (no token)        |
+| `/jobs/{id}`                              | GET    | Public (no token)        |
+| `/jobs`                                   | POST   | `RECRUITER` only         |
+| `/jobs/my`                                | GET    | `RECRUITER` only         |
+| `/jobs/{id}`                              | PUT    | `RECRUITER` only (owner) |
+| `/jobs/{id}/status`                       | PATCH  | `RECRUITER` only (owner) |
+| `/jobs/{id}`                              | DELETE | `RECRUITER` only (owner) |
+| `/applications/{jobId}`                   | POST   | `CANDIDATE` only         |
+| `/applications/my`                        | GET    | `CANDIDATE` only         |
+| `/applications/{id}`                      | GET    | `CANDIDATE` only (owner) |
+| `/applications/{applicationId}/candidate` | GET    | `RECRUITER` only (owner) |
+| `/applications/job/{jobId}`               | GET    | `RECRUITER` only (owner) |
+| `/applications/{id}/status`               | PATCH  | `RECRUITER` only (owner) |
 
 ---
 
@@ -618,7 +619,86 @@ Authorization: Bearer <recruiterAccessToken>
 
 ---
 
-### 12. Update Application Status (Recruiter)
+### 12. Get Candidate Detail (Recruiter)
+
+Returns the full candidate profile — skills, experience, education — for a specific application. Use this when a recruiter clicks on an applicant to review their full background.
+
+```
+GET /api/v1/applications/{applicationId}/candidate
+Authorization: Bearer <recruiterAccessToken>
+```
+
+**Success Response — `200 OK`:**
+```json
+{
+  "success": true,
+  "message": "Success",
+  "data": {
+    "applicationId": "application-uuid",
+    "jobId": "job-uuid",
+    "jobTitle": "Senior Backend Developer",
+    "matchScore": 75,
+    "status": "PENDING",
+    "appliedAt": "2026-05-01T10:00:00",
+    "profile": {
+      "id": "profile-uuid",
+      "userId": "user-uuid",
+      "email": "rahim@example.com",
+      "fullName": "Rahim Uddin",
+      "phone": "+8801712345678",
+      "location": "Dhaka, Bangladesh",
+      "avatarUrl": "https://xyz.supabase.co/.../profile_avatars/candidate/user-uuid.jpg",
+      "resumeUrl": "https://xyz.supabase.co/.../resume.pdf",
+      "linkedinUrl": "https://linkedin.com/in/rahimuddin",
+      "githubUrl": "https://github.com/rahimuddin",
+      "summary": "Passionate backend developer...",
+      "totalApplications": 7,
+      "skills": [
+        {
+          "id": "candidate-skill-uuid",
+          "skillId": "skill-uuid",
+          "skillName": "Kotlin",
+          "category": "PROGRAMMING",
+          "proficiencyLevel": "ADVANCED"
+        }
+      ],
+      "experiences": [
+        {
+          "id": "experience-uuid",
+          "company": "TechCorp BD",
+          "title": "Backend Developer",
+          "startDate": "2023-01-15",
+          "endDate": null,
+          "isCurrent": true,
+          "description": "Built REST APIs using Spring Boot and Kotlin."
+        }
+      ],
+      "educations": [
+        {
+          "id": "education-uuid",
+          "institution": "Dhaka Polytechnic Institute",
+          "degree": "Diploma in Engineering",
+          "field": "Computer Science",
+          "graduationDate": "2025-06-01"
+        }
+      ]
+    }
+  },
+  "errors": null
+}
+```
+
+**Error Responses:**
+
+| Status | Scenario                                                  |
+|--------|-----------------------------------------------------------|
+| `401`  | Recruiter doesn't own the job this application belongs to |
+| `403`  | Candidate token used                                      |
+| `404`  | Application not found                                     |
+
+---
+
+### 13. Update Application Status (Recruiter)
 
 Move an application through the recruitment pipeline.
 

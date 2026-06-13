@@ -39,6 +39,17 @@ data class UpdateApplicationStatusRequest(
     val status: ApplicationStatus
 )
 
+// Full candidate profile as seen by a recruiter
+data class CandidateDetailResponse(
+    val applicationId: String,
+    val jobId: String,
+    val jobTitle: String,
+    val matchScore: Int?,
+    val status: ApplicationStatus,
+    val appliedAt: LocalDateTime,
+    val profile: CandidateProfileResponse
+)
+
 // Candidate's application list item
 data class MyApplicationResponse(
     val applicationId: String,

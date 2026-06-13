@@ -293,14 +293,15 @@ roadmap with resources per skill.
 
 ### Applications `/api/v1/applications`
 
-| Method | Endpoint               | Auth      | Description                                       |
-|--------|------------------------|-----------|---------------------------------------------------|
-| POST   | `/{jobId}`             | CANDIDATE | Apply to a job                                    |
-| GET    | `/my`                  | CANDIDATE | View my applications (paginated)                  |
-| GET    | `/{id}`                | CANDIDATE | Get application detail                            |
-| GET    | `/job/{jobId}`         | RECRUITER | View applicants sorted by match score (paginated) |
-| GET    | `/job/{jobId}?status=` | RECRUITER | Filter applicants by status (paginated)           |
-| PATCH  | `/{id}/status`         | RECRUITER | Shortlist / reject / hire                         |
+| Method | Endpoint                     | Auth      | Description                                       |
+|--------|------------------------------|-----------|---------------------------------------------------|
+| POST   | `/{jobId}`                   | CANDIDATE | Apply to a job                                    |
+| GET    | `/my`                        | CANDIDATE | View my applications (paginated)                  |
+| GET    | `/{id}`                      | CANDIDATE | Get application detail                            |
+| GET    | `/job/{jobId}`               | RECRUITER | View applicants sorted by match score (paginated) |
+| GET    | `/job/{jobId}?status=`       | RECRUITER | Filter applicants by status (paginated)           |
+| PATCH  | `/{id}/status`               | RECRUITER | Shortlist / reject / hire                         |
+| GET    | `/{applicationId}/candidate` | RECRUITER | View full candidate profile for an application    |
 
 **Application statuses:** `PENDING` → `REVIEWED` → `SHORTLISTED` → `HIRED` / `REJECTED`
 
