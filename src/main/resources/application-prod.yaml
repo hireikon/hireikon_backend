@@ -9,6 +9,11 @@ spring:
     hikari:
       maximum-pool-size: 20
       minimum-idle: 5
+  data:
+    redis:
+      url: ${REDIS_URL}
+      timeout: 500ms
+      connect-timeout: 1s
 
 logging:
   level:

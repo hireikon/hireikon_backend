@@ -8,64 +8,19 @@ Built with **Spring Boot + Kotlin**, powered by **Google Gemini AI**, backed by 
 
 ## Tech Stack
 
-| Layer           | Technology                           |
-|-----------------|--------------------------------------|
-| Language        | Kotlin 1.9.25                        |
-| Framework       | Spring Boot 3.5.13                   |
-| Database        | PostgreSQL via Supabase              |
-| ORM             | Spring Data JPA + Hibernate          |
-| AI Engine       | Google Gemini API                    |
-| File Storage    | Supabase Storage                     |
-| Auth            | JWT (HS512) + Refresh Token Rotation |
-| Connection Pool | HikariCP                             |
-| HTTP Client     | Spring WebFlux WebClient             |
-| Build Tool      | Gradle (Kotlin DSL)                  |
-
----
-
-## Project Structure
-
-```
-src/main/kotlin/com/hireikon/hireikon_backend/
-├── ai/
-│   ├── GeminiClient.kt                # Gemini API HTTP client
-│   ├── ResumeParser.kt                # PDF resume extraction + profile population
-│   ├── SkillGapAnalyzer.kt            # Match scoring + AI gap analysis
-│   └── QuizGenerator.kt               # AI quiz question generation
-├── controller/
-│   ├── AuthController.kt
-│   ├── CandidateController.kt
-│   ├── AiController.kt
-│   ├── JobController.kt
-│   ├── ApplicationController.kt
-│   └── QuizController.kt
-├── database/
-│   ├── model/                         # All JPA entities
-│   │   └── enums/                     # All enums
-│   └── repository/                    # All Spring Data JPA repositories
-├── dto/
-│   ├── AuthDto.kt
-│   ├── CandidateDto.kt
-│   ├── AiDto.kt
-│   ├── JobDto.kt
-│   ├── ApplicationDto.kt
-│   └── QuizDto.kt
-├── security/
-│   ├── JwtAuthFilter.kt              # JWT request filter
-│   ├── JwtService.kt                 # JWT generation + validation
-│   └── SecurityConfig.kt             # Spring Security + JWT + CORS
-├── service/
-│   ├── AuthService.kt
-│   ├── CandidateService.kt
-│   ├── JobService.kt
-│   ├── ApplicationService.kt
-│   ├── QuizService.kt
-│   └── StorageService.kt             # Supabase Storage upload/delete
-├── shared/
-│   ├── ApiResponse.kt                # Unified response wrapper + custom exceptions
-│   ├── GlobalExceptionHandler.kt     # Centralized error handling
-└── HireikonBackendApplication.kt
-```
+| Layer           | Technology                                      |
+|-----------------|-------------------------------------------------|
+| Language        | Kotlin 2.3.21                                   |
+| Framework       | Spring Boot 4.1.2                               |
+| Database        | PostgreSQL via Supabase                         |
+| ORM             | Spring Data JPA + Hibernate                     |
+| AI Engine       | Google Gemini API                               |
+| File Storage    | Supabase Storage                                |
+| Auth            | JWT (HS512) + Refresh Token Rotation            |
+| Connection Pool | HikariCP                                        |
+| HTTP Client     | Spring WebFlux WebClient                        |
+| Build Tool      | Gradle (Kotlin DSL)                             |
+| Rate Limiting   | Redis (Lua sliding window) + in-memory fallback |
 
 ---
 
@@ -97,6 +52,7 @@ src/main/kotlin/com/hireikon/hireikon_backend/
 - Gradle
 - Supabase project (PostgreSQL + Storage)
 - Google Gemini API key
+- Redis (local: `docker run -p 6379:6379 redis:7`; optional in dev, the app falls back to in-memory limits)
 
 ### Environment Variables
 
@@ -110,6 +66,7 @@ src/main/kotlin/com/hireikon/hireikon_backend/
 | `GEMINI_API_KEY`                | Google Gemini API key                                                                |
 | `SUPABASE_URL`                  | e.g. `https://xyz.supabase.co`                                                       |
 | `SUPABASE_ANON_KEY`             | Supabase project anon key                                                            |
+| `REDIS_URL`                     | Redis connection URL (on Render use the Internal URL)                                |
 
 ### Run Locally
 
@@ -194,6 +151,38 @@ Response includes:
 ```
 
 Pass `nextCursor` as `cursor` in the next request. When `hasMore` is `false`, you've reached the last page.
+
+---
+
+### Rate Limiting
+Limits apply per account for logged-in users and per IP for anonymous requests. Counters live in Redis, so they survive restarts and are shared across instances.
+
+| Bucket                 | Endpoints                                                 | Limit | Window    |
+|------------------------|-----------------------------------------------------------|-------|-----------|
+| `AUTH_LOGIN`           | `POST /auth/login`                                        | 5     | 1 minute  |
+| `AUTH_REGISTER`        | `POST /auth/register`                                     | 5     | 1 hour    |
+| `AUTH_FORGOT_PASSWORD` | `POST /auth/forgot-password`                              | 3     | 5 minutes |
+| `AUTH_RESET_PASSWORD`  | `POST /auth/reset-password`, `POST /auth/password`        | 3     | 5 minutes |
+| `AI_RESUME_PARSE`      | `POST /ai/resume/parse`, `POST /ai/resume/parse-and-fill` | 5     | 1 hour    |
+| `AI_SKILL_GAP`         | `GET /ai/skill-gap`                                       | 10    | 1 hour    |
+| `AI_QUIZ_GENERATE`     | `GET /ai/quiz`, `POST /quiz/generate`                     | 20    | 1 hour    |
+| `APPLICATION_SUBMIT`   | `POST /applications/{jobId}`                              | 30    | 1 hour    |
+| `GENERAL`              | every other `/api` endpoint                               | 120   | 1 minute  |
+
+Endpoints in the same bucket share one counter.
+
+Every `/api` response includes `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` (seconds until the window frees up). When the limit is exceeded the API returns `429 Too Many Requests` with a `Retry-After` header:
+
+```json
+{
+  "success": false,
+  "message": "Too many login attempts. Please wait a minute before trying again.",
+  "data": null,
+  "errors": null
+}
+```
+
+If Redis is unreachable, limits fall back to per-instance in-memory counters for 10 seconds at a time, then Redis is retried.
 
 ---
 
@@ -331,21 +320,24 @@ roadmap with resources per skill.
 - **BCrypt (cost 12)** — for passwords
 - **SHA-256** — for refresh token hashing (high-entropy input, no salt needed)
 - **Supabase PgBouncer** — `prepareThreshold=0&preferQueryMode=simple` in JDBC URL
+- **Rate limiting** — Redis-backed sliding window per account/IP on login, password reset, and every Gemini-calling endpoint
 
 ---
 
 ## Known Quirks & Fixes Applied
 
-| Issue                                              | Fix                                                           |
-|----------------------------------------------------|---------------------------------------------------------------|
-| Supabase PgBouncer prepared statement conflict     | Added `prepareThreshold=0&preferQueryMode=simple` to JDBC URL |
-| Gemini wraps JSON in markdown fences               | Strip ` ```json ``` ` before parsing                          |
-| Gemini formats emails as `[email](mailto:email)`   | Regex cleanup before Jackson parses                           |
-| Transaction rollback-only on resume parse-and-fill | `ResumeProfileSaver` with `REQUIRES_NEW` propagation          |
-| Duplicate key on job skill update                  | `@Modifying deleteByJobId()` + `flush()` before re-insert     |
-| 403 on recruiter application routes                | Reordered `SecurityConfig` rules — specific before general    |
-| Quiz result showing empty `candidateAnswer`        | Store answers as JSONB on submit, read back on result         |
-| PNG/WebP avatar upload fails as JPEG               | Convert to RGB BufferedImage before JPEG encoding             |
+| Issue                                               | Fix                                                                                                  |
+|-----------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| Supabase PgBouncer prepared statement conflict      | Added `prepareThreshold=0&preferQueryMode=simple` to JDBC URL                                        |
+| Gemini wraps JSON in markdown fences                | Strip ` ```json ``` ` before parsing                                                                 |
+| Gemini formats emails as `[email](mailto:email)`    | Regex cleanup before Jackson parses                                                                  |
+| Transaction rollback-only on resume parse-and-fill  | `ResumeProfileSaver` with `REQUIRES_NEW` propagation                                                 |
+| Duplicate key on job skill update                   | `@Modifying deleteByJobId()` + `flush()` before re-insert                                            |
+| 403 on recruiter application routes                 | Reordered `SecurityConfig` rules — specific before general                                           |
+| Quiz result showing empty `candidateAnswer`         | Store answers as JSONB on submit, read back on result                                                |
+| PNG/WebP avatar upload fails as JPEG                | Convert to RGB BufferedImage before JPEG encoding                                                    |
+| Redis unavailable                                   | Limiter falls back to per-instance in-memory counters for 10s, then retries Redis                    |
+| `X-Forwarded-For` can be spoofed to dodge IP limits | Use `server.forward-headers-strategy=native` and `request.remoteAddr`, never read the header by hand |
 
 ---
 

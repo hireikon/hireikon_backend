@@ -417,6 +417,8 @@ Authorization: Bearer <recruiterAccessToken>
 
 Submits an application for a job. The match score is calculated instantly. A full AI skill gap report is generated and stored asynchronously — if AI fails, the application still succeeds.
 
+> **Rate limit:** 30 applications per hour per user. Each application triggers an AI skill-gap analysis, so this also caps Gemini usage.
+
 ```
 POST /api/v1/applications/{jobId}
 Authorization: Bearer <candidateAccessToken>
@@ -457,12 +459,13 @@ No request body needed — `jobId` is in the path.
 
 **Error Responses:**
 
-| Status | Scenario                    | Message                                          |
-|--------|-----------------------------|--------------------------------------------------|
-| `400`  | Job is not `OPEN`           | `"This job is no longer accepting applications"` |
-| `404`  | Job not found               | `"Job not found"`                                |
-| `404`  | Candidate profile not found | `"Candidate profile not found"`                  |
-| `409`  | Already applied             | `"You have already applied for this job"`        |
+| Status | Scenario                    | Message                                                                       |
+|--------|-----------------------------|-------------------------------------------------------------------------------|
+| `400`  | Job is not `OPEN`           | `"This job is no longer accepting applications"`                              |
+| `404`  | Job not found               | `"Job not found"`                                                             |
+| `404`  | Candidate profile not found | `"Candidate profile not found"`                                               |
+| `409`  | Already applied             | `"You have already applied for this job"`                                     |
+| `429`  | Rate limit exceeded         | `"Application limit reached. You can submit up to 30 applications per hour."` |
 
 ---
 
@@ -775,11 +778,12 @@ GET /api/v1/ai/skill-gap?jobId={jobId}
 
 ## Common Errors
 
-| Status | Message                                          | Cause                                    |
-|--------|--------------------------------------------------|------------------------------------------|
-| `400`  | `"This job is no longer accepting applications"` | Job status is not `OPEN`                 |
-| `401`  | Unauthorized                                     | Trying to modify another user's resource |
-| `403`  | Forbidden                                        | Wrong role for the endpoint              |
-| `404`  | `"Job not found"`                                | Invalid job ID                           |
-| `404`  | `"Application not found"`                        | Invalid application ID                   |
-| `409`  | `"You have already applied for this job"`        | Duplicate application                    |
+| Status | Message                                          | Cause                                                                         |
+|--------|--------------------------------------------------|-------------------------------------------------------------------------------|
+| `400`  | `"This job is no longer accepting applications"` | Job status is not `OPEN`                                                      |
+| `401`  | Unauthorized                                     | Trying to modify another user's resource                                      |
+| `403`  | Forbidden                                        | Wrong role for the endpoint                                                   |
+| `404`  | `"Job not found"`                                | Invalid job ID                                                                |
+| `404`  | `"Application not found"`                        | Invalid application ID                                                        |
+| `409`  | `"You have already applied for this job"`        | Duplicate application                                                         |
+| `429`  | Rate limit exceeded                              | `"Application limit reached. You can submit up to 30 applications per hour."` |

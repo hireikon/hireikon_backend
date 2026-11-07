@@ -9,6 +9,11 @@ spring:
     user:
       name: user
       password: test
+  data:
+    redis:
+      url: redis://localhost:6379
+      timeout: 500ms
+      connect-timeout: 1s
 
 logging:
   level:

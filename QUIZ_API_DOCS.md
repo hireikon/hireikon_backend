@@ -51,6 +51,10 @@ Generate Quiz ──► Get Quiz (questions only)
 
 Calls Gemini AI to generate multiple-choice questions for a skill at a given difficulty level.
 
+[//]: # (Works for any topic. If the topic doesn't exist yet, it is created automatically &#40;category `OTHER`&#41;.)
+
+> **Rate limit:** 20 per hour per user (shared with `GET /ai/quiz`).
+
 ```
 POST /api/v1/quiz/generate
 Content-Type: application/json
@@ -125,11 +129,12 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario                     | Message                                                |
-|--------|------------------------------|--------------------------------------------------------|
-| `400`  | `questionCount` outside 3–10 | `"questionCount must be between 3 and 10"`             |
-| `404`  | Skill not found in DB        | `"Skill 'X' not found. Add it to your profile first."` |
-| `502`  | Gemini API error             | `"Gemini API error ..."`                               |
+| Status | Scenario                     | Message                                                                        |
+|--------|------------------------------|--------------------------------------------------------------------------------|
+| `400`  | `questionCount` outside 3–10 | `"questionCount must be between 3 and 10"`                                     |
+| `404`  | Skill not found in DB        | `"Skill 'X' not found. Add it to your profile first."`                         |
+| `502`  | Gemini API error             | `"Gemini API error ..."`                                                       |
+| `429`  | Rate limit exceeded          | `"Quiz generation limit reached. You can generate up to 20 quizzes per hour."` |
 
 ---
 
@@ -442,15 +447,16 @@ Quiz data in the `quizzes` table:
 
 ## Common Errors
 
-| Status | Message                                                | Cause                                      |
-|--------|--------------------------------------------------------|--------------------------------------------|
-| `400`  | `"questionCount must be between 3 and 10"`             | Out of range value                         |
-| `400`  | `"This quiz has already been submitted"`               | Re-submission attempt                      |
-| `400`  | `"Expected N answers but got M"`                       | Answer count mismatch                      |
-| `400`  | `"Invalid answer 'X'. Must be A, B, C, or D"`          | Bad answer value                           |
-| `400`  | `"This quiz has not been submitted yet"`               | Accessing result before submit             |
-| `401`  | Unauthorized                                           | Quiz belongs to another candidate          |
-| `403`  | Forbidden                                              | Non-candidate trying to use quiz endpoints |
-| `404`  | `"Quiz not found"`                                     | Invalid quiz ID                            |
-| `404`  | `"Skill 'X' not found. Add it to your profile first."` | Skill not in DB                            |
-| `502`  | `"Gemini API error ..."`                               | AI service unavailable                     |
+| Status | Message                                                | Cause                                                                          |
+|--------|--------------------------------------------------------|--------------------------------------------------------------------------------|
+| `400`  | `"questionCount must be between 3 and 10"`             | Out of range value                                                             |
+| `400`  | `"This quiz has already been submitted"`               | Re-submission attempt                                                          |
+| `400`  | `"Expected N answers but got M"`                       | Answer count mismatch                                                          |
+| `400`  | `"Invalid answer 'X'. Must be A, B, C, or D"`          | Bad answer value                                                               |
+| `400`  | `"This quiz has not been submitted yet"`               | Accessing result before submit                                                 |
+| `401`  | Unauthorized                                           | Quiz belongs to another candidate                                              |
+| `403`  | Forbidden                                              | Non-candidate trying to use quiz endpoints                                     |
+| `404`  | `"Quiz not found"`                                     | Invalid quiz ID                                                                |
+| `404`  | `"Skill 'X' not found. Add it to your profile first."` | Skill not in DB                                                                |
+| `429`  | Rate limit exceeded                                    | `"Quiz generation limit reached. You can generate up to 20 quizzes per hour."` |
+| `502`  | `"Gemini API error ..."`                               | AI service unavailable                                                         |

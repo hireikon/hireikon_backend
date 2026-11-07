@@ -1,12 +1,14 @@
 package com.hireikon.hireikon_backend.ai
 
-import com.fasterxml.jackson.databind.ObjectMapper
+//import com.fasterxml.jackson.databind.ObjectMapper
 import com.hireikon.hireikon_backend.database.repository.CandidateProfileRepository
 import com.hireikon.hireikon_backend.database.repository.CandidateSkillRepository
 import com.hireikon.hireikon_backend.database.repository.JobRequiredSkillRepository
 import com.hireikon.hireikon_backend.dto.SkillGapReportDto
 import com.hireikon.hireikon_backend.shared.ResourceNotFoundException
 import org.springframework.stereotype.Component
+import org.springframework.transaction.annotation.Transactional
+import tools.jackson.databind.ObjectMapper
 
 @Component
 class SkillGapAnalyzer(
@@ -24,6 +26,7 @@ class SkillGapAnalyzer(
         For learning resources, prefer free resources when available but include paid ones if they are significantly better.
     """.trimIndent()
 
+    @Transactional(readOnly = true)
     fun analyze(userId: String, jobId: String): SkillGapReportDto {
         val profile = candidateProfileRepository.findByUserId(userId)
             .orElseThrow { ResourceNotFoundException("Candidate profile not found") }

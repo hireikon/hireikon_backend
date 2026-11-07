@@ -10,6 +10,8 @@ import com.hireikon.hireikon_backend.service.ApplicationService
 import com.hireikon.hireikon_backend.shared.ApiResponse
 import com.hireikon.hireikon_backend.shared.CursorPage
 import com.hireikon.hireikon_backend.shared.CursorRequest
+import com.hireikon.hireikon_backend.shared.RateLimit
+import com.hireikon.hireikon_backend.shared.RateLimitBucket
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -31,6 +33,7 @@ class ApplicationController(
 
     // POST /api/v1/applications/{jobId}
     @PostMapping("/{jobId}")
+    @RateLimit(RateLimitBucket.APPLICATION_SUBMIT)
     fun apply(
         @PathVariable jobId: String
     ): ResponseEntity<ApiResponse<ApplicationResponse>> =
@@ -93,5 +96,5 @@ class ApplicationController(
         ))
 
     private fun currentUserId(): String =
-        SecurityContextHolder.getContext().authentication.principal as String
+        SecurityContextHolder.getContext().authentication?.principal as String
 }

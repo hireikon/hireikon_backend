@@ -39,6 +39,8 @@ class CandidateService(
     private val applicationRepository: ApplicationRepository,
     private val resumeStorageService: ResumeStorageService
 ) {
+
+    @Transactional(readOnly = true)
     fun getProfile(userId: String): CandidateProfileResponse {
         val profile = findProfileByUserId(userId)
         return profile.toResponse()

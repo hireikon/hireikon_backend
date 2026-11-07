@@ -29,3 +29,5 @@ class BadRequestException(message: String) : RuntimeException(message)
 class AiProcessingException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
 
 class FileStorageException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+
+class RateLimitExceededException(message: String, val retryAfterSeconds: Long) : RuntimeException(message)

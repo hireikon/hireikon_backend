@@ -30,6 +30,7 @@ spring:
 
 server:
   port: 8080
+  forward-headers-strategy: native
   error:
     include-message: on_param
     include-binding-errors: on_param
@@ -47,3 +48,10 @@ management:
   endpoint:
     health:
       show-details: never
+  health:
+    redis:
+      enabled: false
+
+app:
+  rate-limit:
+    enabled: true

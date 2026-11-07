@@ -65,5 +65,5 @@ class RecruiterController(
     }
 
     private fun currentUserId(): String =
-        SecurityContextHolder.getContext().authentication.principal as String
+        SecurityContextHolder.getContext().authentication?.principal as String
 }

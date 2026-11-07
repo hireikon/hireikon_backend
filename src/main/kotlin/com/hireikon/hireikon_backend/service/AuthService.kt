@@ -54,7 +54,7 @@ class AuthService(
         val user = userRepository.save(
             UserEntity(
                 email = request.email,
-                passwordHash = passwordEncoder.encode(request.password),
+                passwordHash = passwordEncoder.encode(request.password)!!,
                 role = request.role
             )
         )
@@ -145,7 +145,7 @@ class AuthService(
             throw BadRequestException("New password must be different from your current password")
         }
 
-        user.passwordHash = passwordEncoder.encode(newPassword)
+        user.passwordHash = passwordEncoder.encode(newPassword)!!
         userRepository.save(user)
         refreshTokenRepository.deleteByUserId(user.id)
     }

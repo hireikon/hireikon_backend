@@ -12,6 +12,8 @@ import com.hireikon.hireikon_backend.security.JwtService
 import com.hireikon.hireikon_backend.service.AuthService
 import com.hireikon.hireikon_backend.service.ForgotPasswordService
 import com.hireikon.hireikon_backend.shared.ApiResponse
+import com.hireikon.hireikon_backend.shared.RateLimit
+import com.hireikon.hireikon_backend.shared.RateLimitBucket
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -34,6 +36,7 @@ class AuthController(
 
     // POST /api/v1/auth/register
     @PostMapping("/register")
+    @RateLimit(RateLimitBucket.AUTH_REGISTER)
     fun register(
         @Valid @RequestBody request: RegisterRequest
     ): ResponseEntity<ApiResponse<AuthResponse>> {
@@ -47,6 +50,7 @@ class AuthController(
 
     // POST /api/v1/auth/login
     @PostMapping("/login")
+    @RateLimit(RateLimitBucket.AUTH_LOGIN)
     fun login(
         @Valid @RequestBody request: LoginRequest
     ): ResponseEntity<ApiResponse<AuthResponse>> {
@@ -69,6 +73,7 @@ class AuthController(
 
     // POST /api/v1/auth/forgot-password
     @PostMapping("/forgot-password")
+    @RateLimit(RateLimitBucket.AUTH_FORGOT_PASSWORD)
     fun forgotPassword(
         @Valid @RequestBody request: ForgotPasswordRequest
     ): ResponseEntity<ApiResponse<Nothing?>> {
@@ -81,6 +86,7 @@ class AuthController(
 
     // POST /api/v1/auth/reset-password
     @PostMapping("/reset-password")
+    @RateLimit(RateLimitBucket.AUTH_RESET_PASSWORD)
     fun resetPassword(
         @Valid @RequestBody request: ResetPasswordRequest
     ): ResponseEntity<ApiResponse<Nothing?>> {
@@ -109,6 +115,7 @@ class AuthController(
 
     // PATCH /api/v1/auth/password
     @PatchMapping("/password")
+    @RateLimit(RateLimitBucket.AUTH_RESET_PASSWORD)
     fun updatePassword(
         @AuthenticationPrincipal userId: String,
         @Valid @RequestBody request: UpdatePasswordRequest

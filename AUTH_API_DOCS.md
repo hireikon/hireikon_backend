@@ -57,6 +57,8 @@ Register / Login
 Register a new Candidate or Recruiter account. Returns tokens immediately — no need to login separately after
 registering.
 
+> **Rate limit:** 5 requests per hour per IP.
+
 ```
 POST /api/v1/auth/register
 ```
@@ -125,11 +127,12 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario                      | Message                                              |
-|--------|-------------------------------|------------------------------------------------------|
-| `400`  | Missing/invalid fields        | `"Validation failed"` + field errors                 |
-| `400`  | Recruiter missing companyName | `"Company name is required for recruiter accounts."` |
-| `409`  | Email already registered      | `"An account with this email already exists."`       |
+| Status | Scenario                      | Message                                                          |
+|--------|-------------------------------|------------------------------------------------------------------|
+| `400`  | Missing/invalid fields        | `"Validation failed"` + field errors                             |
+| `400`  | Recruiter missing companyName | `"Company name is required for recruiter accounts."`             |
+| `409`  | Email already registered      | `"An account with this email already exists."`                   |
+| `429`  | Rate limit exceeded           | `"Too many registration attempts. Please try again in an hour."` |
 
 **Example `400` Validation Error:**
 
@@ -150,6 +153,8 @@ Content-Type: application/json
 ### 2. Login
 
 Authenticate an existing user.
+
+> **Rate limit:** 5 requests per minute per IP.
 
 ```
 POST /api/v1/auth/login
@@ -200,9 +205,10 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario                | Message                        |
-|--------|-------------------------|--------------------------------|
-| `401`  | Wrong email or password | `"Invalid email or password."` |
+| Status | Scenario                | Message                                                                |
+|--------|-------------------------|------------------------------------------------------------------------|
+| `401`  | Wrong email or password | `"Invalid email or password."`                                         |
+| `429`  | Rate limit exceeded     | `"Too many login attempts. Please wait a minute before trying again."` |
 
 > **Security note:** Wrong email and wrong password return the same message intentionally — this prevents user
 > enumeration attacks (finding out which emails are registered).
@@ -404,6 +410,8 @@ Authorization: Bearer <accessToken>
 
 Updates the password for the currently authenticated user. Requires the current password for verification. All existing sessions are invalidated after a successful update — the user must log in again.
 
+> **Rate limit:** 3 requests per 5 minutes per IP.
+
 ```
 PATCH /api/v1/auth/password
 Authorization: Bearer <accessToken>
@@ -437,12 +445,14 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario                   | Message                                                       |
-|--------|----------------------------|---------------------------------------------------------------|
-| `400`  | Wrong current password     | `"Current password is incorrect"`                             |
-| `400`  | Same as current password   | `"New password must be different from your current password"` |
-| `400`  | New password too short     | `"newPassword: New password must be at least 8 characters"`   |
-| `401`  | No or invalid access token | Unauthorized                                                  |
+| Status | Scenario                   | Message                                                             |
+|--------|----------------------------|---------------------------------------------------------------------|
+| `400`  | Wrong current password     | `"Current password is incorrect"`                                   |
+| `400`  | Same as current password   | `"New password must be different from your current password"`       |
+| `400`  | New password too short     | `"newPassword: New password must be at least 8 characters"`         |
+| `401`  | No or invalid access token | Unauthorized                                                        |
+| `429`  | Rate limit exceeded        | `"Too many password reset request. Please try again in 5 minutes."` |
+
 
 > **Note:** The current access token remains valid until it naturally expires. Only refresh tokens are invalidated — so the user stays logged in briefly but cannot silently refresh after expiry.
 
@@ -450,8 +460,9 @@ Content-Type: application/json
 
 ### 8. Forgot Password
 
-Sends a password reset email to the provided address. Always returns `200 OK` regardless of whether the email exists —
-this prevents attackers from discovering which emails are registered.
+Sends a password reset email to the provided address. Always returns `200 OK` regardless of whether the email exists — this prevents attackers from discovering which emails are registered.
+
+> **Rate limit:** 3 requests per 5 minutes per IP. Also prevents email flooding.
 
 ```
 POST /api/v1/auth/forgot-password
@@ -496,14 +507,15 @@ Token expires in **15 minutes**. Only one active token per user — requesting a
 | Status | Scenario             |
 |--------|----------------------|
 | `400`  | Invalid email format |
+| `429`  | Rate limit exceeded  |
 
 ---
 
 ### 9. Reset Password
 
-Resets the user's password using the token from the email link. The token is single-use and deleted immediately after a
-successful reset. All existing sessions (refresh tokens) are also invalidated — the user must log in again on all
-devices.
+Resets the user's password using the token from the email link. The token is single-use and deleted immediately after a successful reset. All existing sessions (refresh tokens) are also invalidated — the user must log in again on all devices.
+
+> **Rate limit:** 3 requests per 5 minutes per IP. Also prevents email flooding.
 
 ```
 POST /api/v1/auth/reset-password
@@ -539,13 +551,14 @@ Content-Type: application/json
 
 **Error Responses:**
 
-| Status | Scenario                        | Message                                                       |
-|--------|---------------------------------|---------------------------------------------------------------|
-| `400`  | Password too short              | `"newPassword: Password must be at least 8 characters"`       |
-| `400`  | Same as current password        | `"New password must be different from your current password"` |
-| `400`  | Missing token or password       | Validation errors                                             |
-| `401`  | Token not found or already used | `"Invalid or expired reset token"`                            |
-| `401`  | Token expired                   | `"Reset token has expired. Please request a new one."`        |
+| Status | Scenario                        | Message                                                             |
+|--------|---------------------------------|---------------------------------------------------------------------|
+| `400`  | Password too short              | `"newPassword: Password must be at least 8 characters"`             |
+| `400`  | Same as current password        | `"New password must be different from your current password"`       |
+| `400`  | Missing token or password       | Validation errors                                                   |
+| `401`  | Token not found or already used | `"Invalid or expired reset token"`                                  |
+| `401`  | Token expired                   | `"Reset token has expired. Please request a new one."`              |
+| `429`  | Rate limit exceeded             | `"Too many password reset request. Please try again in 5 minutes."` |
 
 ---
 
@@ -609,14 +622,15 @@ Sending a request to a role-restricted route with the wrong role returns:
 
 ## Common Error Reference
 
-| HTTP Status                 | Meaning                 | When it happens                            |
-|-----------------------------|-------------------------|--------------------------------------------|
-| `400 Bad Request`           | Invalid input           | Missing fields, failed `@Valid` validation |
-| `401 Unauthorized`          | Authentication failed   | Bad credentials, expired/missing token     |
-| `403 Forbidden`             | Wrong role              | Correct token but insufficient permissions |
-| `404 Not Found`             | Resource missing        | User ID from token no longer in DB         |
-| `409 Conflict`              | Duplicate resource      | Email already registered                   |
-| `500 Internal Server Error` | Unexpected server error | Bug or DB connection issue                 |
+| HTTP Status                 | Meaning                 | When it happens                                                                                  |
+|-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------|
+| `400 Bad Request`           | Invalid input           | Missing fields, failed `@Valid` validation                                                       |
+| `401 Unauthorized`          | Authentication failed   | Bad credentials, expired/missing token                                                           |
+| `403 Forbidden`             | Wrong role              | Correct token but insufficient permissions                                                       |
+| `404 Not Found`             | Resource missing        | User ID from token no longer in DB                                                               |
+| `409 Conflict`              | Duplicate resource      | Email already registered                                                                         |
+| `429 Too Many Requests`     | Rate limit exceeded     | Login, register, or forgot-password limit hit. Read the `Retry-After` header for seconds to wait |
+| `500 Internal Server Error` | Unexpected server error | Bug or DB connection issue                                                                       |
 
 ---
 
@@ -655,3 +669,12 @@ Sending a request to a role-restricted route with the wrong role returns:
 4. On submit, call `POST /api/v1/auth/reset-password` with the token and new password.
 5. On success — **before redirecting** — remove the token from the browser URL bar and history so it can't be reused from the browser back button.
 6. Redirect to `/login` with a success message: `"Password reset successfully. Please log in."`
+
+---
+
+### Handling Rate Limits (429)
+
+1. On any `429` response, read the `Retry-After` header (seconds).
+2. Disable the submit button and show a countdown, or show the `message` from the response body.
+3. Re-enable the button when the countdown ends. Do not auto-retry in a loop, that only extends the block.
+4. Use `X-RateLimit-Remaining` if you want to warn users before they hit the limit (for example, "1 attempt left").

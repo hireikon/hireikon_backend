@@ -83,7 +83,7 @@ class ForgotPasswordService(
             throw BadRequestException("New password must be different from your current password")
         }
 
-        user.passwordHash = passwordEncoder.encode(newPassword)
+        user.passwordHash = passwordEncoder.encode(newPassword)!!
         userRepository.save(user)
         passwordResetTokenRepository.delete(tokenEntity)
         refreshTokenRepository.deleteByUserId(user.id)

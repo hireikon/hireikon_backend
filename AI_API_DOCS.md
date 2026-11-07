@@ -40,6 +40,8 @@ Authorization: Bearer <candidateAccessToken>
 
 Sends a PDF resume to Gemini and returns structured extracted data. **Nothing is saved to the database** — use this to preview what will be extracted before committing.
 
+> **Rate limit:** 5 per hour per user (shared with parse-and-fill).
+
 ```
 POST /api/v1/ai/resume/parse
 Content-Type: multipart/form-data
@@ -102,11 +104,12 @@ Authorization: Bearer <candidateAccessToken>
 
 **Error Responses:**
 
-| Status | Scenario                    | Message                                      |
-|--------|-----------------------------|----------------------------------------------|
-| `400`  | Non-PDF file                | `"Only PDF files are accepted"`              |
-| `502`  | Gemini API error            | `"Gemini API error 429: ..."`                |
-| `502`  | Failed to parse AI response | `"Failed to parse AI response as JSON: ..."` |
+| Status | Scenario                    | Message                                                                   |
+|--------|-----------------------------|---------------------------------------------------------------------------|
+| `400`  | Non-PDF file                | `"Only PDF files are accepted"`                                           |
+| `502`  | Gemini API error            | `"Gemini API error 429: ..."`                                             |
+| `502`  | Failed to parse AI response | `"Failed to parse AI response as JSON: ..."`                              |
+| `429`  | Rate limit exceeded         | `"Resume parsing limit reached. You can parse up to 5 resumes per hour."` |
 
 > **Postman:** Body → form-data → key: `file`, type: **File** → select PDF.
 
@@ -116,7 +119,7 @@ Authorization: Bearer <candidateAccessToken>
 
 Parses the PDF **and** automatically populates the candidate's profile — skills, experiences, educations, LinkedIn URL, GitHub URL, and resume URL are all saved in one call.
 
-
+> **Rate limit:** 5 per hour per user (shared with parse).
 
 ```
 POST /api/v1/ai/resume/parse-and-fill
@@ -176,6 +179,7 @@ All fields should be populated including `resumeUrl`, `linkedinUrl`, and `github
 | `400`  | Non-PDF file                             |
 | `500`  | Supabase storage upload failed           |
 | `502`  | Gemini API unreachable or quota exceeded |
+| `429`  | Rate limit exceeded                      |
 
 > **Note:** If Gemini extracts a skill you already have, it is silently skipped — no `409` error, no failure.
 
@@ -227,6 +231,8 @@ Authorization: Bearer <candidateAccessToken>
 ### Full Skill Gap Analysis (AI)
 
 Sends candidate skills and job requirements to Gemini for a detailed analysis. Returns matched skills, missing skills with importance levels, and a full learning roadmap with resources.
+
+> **Rate limit:** 10 per hour per user.
 
 ```
 GET /api/v1/ai/skill-gap?jobId={jobId}
@@ -336,6 +342,7 @@ Authorization: Bearer <candidateAccessToken>
 |--------|-----------------------------|
 | `404`  | Candidate profile not found |
 | `502`  | Gemini API error            |
+| `429`  | Rate limit exceeded         |
 
 > **Performance note:** This endpoint makes a Gemini API call — expect 3–8 seconds response time. Use `/match-score` for real-time UI feedback and `/skill-gap` only when the candidate clicks "View Full Analysis".
 
@@ -346,6 +353,8 @@ Authorization: Bearer <candidateAccessToken>
 ### Generate Skill Quiz
 
 Generates multiple-choice questions for a specific skill at a given difficulty level. Questions are practical and test real-world knowledge.
+
+> **Rate limit:** 20 per hour per user (shared with POST /quiz/generate).
 
 ```
 GET /api/v1/ai/quiz?skillName={skillName}\&proficiencyLevel={level}\&questionCount={n}
@@ -414,11 +423,12 @@ GET /api/v1/ai/quiz?skillName=Kotlin\&proficiencyLevel=INTERMEDIATE\&questionCou
 
 **Error Responses:**
 
-| Status | Scenario                      | Message                                     |
-|--------|-------------------------------|---------------------------------------------|
-| `400`  | `questionCount` outside 10–30 | `"questionCount must be between 10 and 30"` |
-| `404`  | Skill not found in DB         | `"Skill 'FakeSkill' not found"`             |
-| `502`  | Gemini API error              | `"Gemini API error ..."`                    |
+| Status | Scenario                      | Message                                                                        |
+|--------|-------------------------------|--------------------------------------------------------------------------------|
+| `400`  | `questionCount` outside 10–30 | `"questionCount must be between 10 and 30"`                                    |
+| `404`  | Skill not found in DB         | `"Skill 'FakeSkill' not found"`                                                |
+| `502`  | Gemini API error              | `"Gemini API error ..."`                                                       |
+| `429`  | Rate limit exceeded           | `"Quiz generation limit reached. You can generate up to 20 quizzes per hour."` |
 
 > **Note:** The skill must already exist in the `skills` table. Skills are created automatically when candidates add them to their profile — so run `/candidate/skills` first to populate the DB.
 
@@ -448,5 +458,6 @@ GET /api/v1/ai/quiz?skillName=Kotlin\&proficiencyLevel=INTERMEDIATE\&questionCou
 | `502`  | `"Gemini API error 401"`                | Check `GEMINI_API_KEY` env var            |
 | `502`  | `"Gemini API error 429"`                | Quota exceeded — wait or upgrade plan     |
 | `502`  | `"Failed to parse AI response as JSON"` | Gemini returned unexpected format — retry |
-| `500`  | `"Failed to upload resume to storage"`  | Check Supabase Storage RLS policy         |
 | `404`  | `"Skill 'X' not found"`                 | Add the skill to your profile first       |
+| `429`  | Rate limit exceeded                     | Wait for the `Retry-After` seconds        |
+| `500`  | `"Failed to upload resume to storage"`  | Check Supabase Storage RLS policy         |

@@ -1,13 +1,15 @@
 package com.hireikon.hireikon_backend.ai
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
+//import com.fasterxml.jackson.core.type.TypeReference
+//import com.fasterxml.jackson.databind.ObjectMapper
 import com.hireikon.hireikon_backend.shared.AiProcessingException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
 import java.util.Base64
 
 @Component

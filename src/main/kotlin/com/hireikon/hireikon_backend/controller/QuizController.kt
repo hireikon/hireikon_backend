@@ -9,6 +9,8 @@ import com.hireikon.hireikon_backend.service.QuizService
 import com.hireikon.hireikon_backend.shared.ApiResponse
 import com.hireikon.hireikon_backend.shared.CursorPage
 import com.hireikon.hireikon_backend.shared.CursorRequest
+import com.hireikon.hireikon_backend.shared.RateLimit
+import com.hireikon.hireikon_backend.shared.RateLimitBucket
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -29,6 +31,7 @@ class QuizController(
 
     // POST /api/v1/quiz/generate
     @PostMapping("/generate")
+    @RateLimit(RateLimitBucket.AI_QUIZ_GENERATE)
     fun generateQuiz(
         @Valid @RequestBody request: GenerateQuizRequest
     ): ResponseEntity<ApiResponse<QuizResponse>> =
@@ -88,5 +91,5 @@ class QuizController(
         ))
 
     private fun currentUserId(): String =
-        SecurityContextHolder.getContext().authentication.principal as String
+        SecurityContextHolder.getContext().authentication?.principal as String
 }

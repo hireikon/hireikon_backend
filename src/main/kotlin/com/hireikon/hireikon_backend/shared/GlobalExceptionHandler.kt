@@ -65,6 +65,13 @@ class GlobalExceptionHandler {
         ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
             .body(ApiResponse.error("File size exceeds the 10MB limit"))
 
+    // 429
+    @ExceptionHandler(RateLimitExceededException::class)
+    fun handleRateLimit(ex: RateLimitExceededException): ResponseEntity<ApiResponse<Nothing>> =
+        ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .header("Retry-After", ex.retryAfterSeconds.toString())
+            .body(ApiResponse.error(ex.message ?: "Too many requests"))
+
     // 502 — Gemini/AI failures
     @ExceptionHandler(AiProcessingException::class)
     fun handleAiError(ex: AiProcessingException): ResponseEntity<ApiResponse<Nothing>> =

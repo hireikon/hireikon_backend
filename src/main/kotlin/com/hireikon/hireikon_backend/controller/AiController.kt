@@ -10,6 +10,8 @@ import com.hireikon.hireikon_backend.dto.SkillGapReportDto
 import com.hireikon.hireikon_backend.service.ResumeStorageService
 import com.hireikon.hireikon_backend.shared.ApiResponse
 import com.hireikon.hireikon_backend.shared.BadRequestException
+import com.hireikon.hireikon_backend.shared.RateLimit
+import com.hireikon.hireikon_backend.shared.RateLimitBucket
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
@@ -31,6 +33,7 @@ class AiController(
 
     // POST /api/v1/ai/resume/parse
     @PostMapping("/resume/parse", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @RateLimit(RateLimitBucket.AI_RESUME_PARSE)
     fun parseResume(
         @RequestParam("file") file: MultipartFile
     ): ResponseEntity<ApiResponse<ParsedResumeDto>> {
@@ -48,6 +51,7 @@ class AiController(
 
     // POST /api/v1/ai/resume/parse-and-fill
     @PostMapping("/resume/parse-and-fill", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @RateLimit(RateLimitBucket.AI_RESUME_PARSE)
     fun parseAndFillProfile(
         @RequestParam("file") file: MultipartFile
     ): ResponseEntity<ApiResponse<ParsedResumeDto>> {
@@ -70,6 +74,7 @@ class AiController(
     // GET /api/v1/ai/skill-gap?jobId={jobId}
     // Full AI-powered skill gap analysis for a specific job
     @GetMapping("/skill-gap")
+    @RateLimit(RateLimitBucket.AI_SKILL_GAP)
     fun analyzeSkillGap(
         @RequestParam jobId: String
     ): ResponseEntity<ApiResponse<SkillGapReportDto>> {
@@ -100,6 +105,7 @@ class AiController(
 
     // GET /api/v1/ai/quiz?skillName=Kotlin&proficiencyLevel=INTERMEDIATE&questionCount=10
     @GetMapping("/quiz")
+    @RateLimit(RateLimitBucket.AI_QUIZ_GENERATE)
     fun generateQuiz(
         @RequestParam skillName: String,
         @RequestParam proficiencyLevel: ProficiencyLevel,
@@ -113,5 +119,5 @@ class AiController(
     }
 
     private fun currentUserId(): String =
-        SecurityContextHolder.getContext().authentication.principal as String
+        SecurityContextHolder.getContext().authentication?.principal as String
 }

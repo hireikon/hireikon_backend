@@ -1,7 +1,7 @@
 package com.hireikon.hireikon_backend.service
 
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
+//import com.fasterxml.jackson.core.type.TypeReference
+//import com.fasterxml.jackson.databind.ObjectMapper
 import com.hireikon.hireikon_backend.ai.QuizGenerator
 import com.hireikon.hireikon_backend.database.model.CandidateProfileEntity
 import com.hireikon.hireikon_backend.database.model.QuizEntity
@@ -27,6 +27,8 @@ import com.hireikon.hireikon_backend.shared.UnauthorizedException
 import com.hireikon.hireikon_backend.shared.toCursorPage
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.core.type.TypeReference
+import tools.jackson.databind.ObjectMapper
 
 @Service
 class QuizService(
